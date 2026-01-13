@@ -1,114 +1,142 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, Variants } from 'framer-motion';
+import Lenis from '@studio-freight/lenis';
 import { useAuthStore } from '../stores';
+import { MagneticButton } from '../components/ui/MagneticButton';
+import { CustomCursor } from '../components/ui/CustomCursor';
+import Logo from '../assets/logo.svg';
 import './Landing.css';
 
 export const Landing: React.FC = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuthStore();
-    const [scrolled, setScrolled] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
+    // Initialize Luxury Smooth Scroll
     useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            orientation: 'vertical',
+        });
+
+        function raf(time: number) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
+        requestAnimationFrame(raf);
+
+        return () => {
+            lenis.destroy();
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const handleCtaClick = () => {
-        if (isAuthenticated) {
-            navigate('/app');
-        } else {
-            navigate('/login');
+    const handleEnter = () => {
+        navigate(isAuthenticated ? '/app' : '/login');
+    };
+
+    // Text Animation Variants
+    const revealText: Variants = {
+        hidden: { y: 100, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: { duration: 1, ease: [0.19, 1, 0.22, 1] }
         }
     };
 
+    const staggerContainer: Variants = {
+        visible: { transition: { staggerChildren: 0.1 } }
+    };
+
     return (
-        <div className="landing-page">
-            <div className="grain-overlay" />
+        <div className="landing-container" ref={containerRef}>
+            <CustomCursor />
 
-            {/* Navigation */}
-            <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
-                <div className="nav-brand">
-                    <div className="nav-logo">
-                        <img src="/logo.svg" alt="Aura Logo" style={{ width: '100%', height: '100%' }} />
-                    </div>
-                    <span>Aura</span>
-                </div>
-
-                <div className="nav-links">
-                    <a href="#features" className="nav-link">Features</a>
-                    <a href="#security" className="nav-link">Security</a>
-                    <a href="#about" className="nav-link">About</a>
-                </div>
-
-                <button onClick={handleCtaClick} className="nav-cta">
-                    {isAuthenticated ? 'Go to App' : 'Get Started'}
-                </button>
+            <nav className="zenith-nav">
+                <img src={Logo} alt="AURA" className="nav-logo" />
+                <MagneticButton onClick={handleEnter} className="nav-cta-btn">
+                    {isAuthenticated ? 'Enter Aura' : 'Join Beta'}
+                </MagneticButton>
             </nav>
 
-            {/* Hero Section */}
-            <section className="hero-section">
-                <div className="hero-pill">
-                    Currently in Beta 2.0
-                </div>
+            <header className="z-hero">
+                <div className="ambient-light" />
 
-                <h1 className="hero-title">
-                    Connection,<br />
-                    Reimagined.
-                </h1>
+                <motion.div
+                    className="z-hero-content"
+                    initial="hidden"
+                    animate="visible"
+                    variants={staggerContainer}
+                >
+                    <motion.div variants={revealText} className="overflow-hidden">
+                        <h1 className="z-hero-title">Connection</h1>
+                    </motion.div>
+                    <motion.div variants={revealText} className="overflow-hidden">
+                        <h1 className="z-hero-title" style={{ fontStyle: 'italic', marginLeft: '4rem' }}>
+                            Is Art.
+                        </h1>
+                    </motion.div>
 
-                <p className="hero-description">
-                    Experience messaging in its purest form. Minimal design, maximum privacy,
-                    and a truly human way to connect with those who matter most.
-                </p>
+                    <motion.p variants={revealText} className="z-hero-subtitle">
+                        Experience the purest form of digital intimacy.<br />
+                        No noise. Just you and them.
+                    </motion.p>
 
-                <div className="hero-actions">
-                    <button onClick={handleCtaClick} className="btn-primary">
-                        Start Messaging
-                    </button>
-                    <button className="btn-secondary">
-                        View Demo
-                    </button>
-                </div>
-            </section>
+                    <div className="z-hero-action">
+                        <MagneticButton onClick={handleEnter} className="btn-enter">
+                            Start Messaging
+                        </MagneticButton>
+                    </div>
+                </motion.div>
+            </header>
 
-            {/* Features Section */}
-            <section id="features" className="features-section">
-                <div className="features-grid">
-                    <div className="feature-card">
-                        <div className="feature-icon">✨</div>
-                        <h3 className="feature-title">Thoughtful Design</h3>
-                        <p className="feature-desc">
-                            Every pixel crafted with intention. A distraction-free interface that puts your conversations front and center.
+            <section className="z-philosophy">
+                <motion.div
+                    className="z-grid"
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-10%" }}
+                    transition={{ duration: 1 }}
+                >
+                    <div className="z-feature-item">
+                        <span className="z-feature-number">01</span>
+                        <h3 className="z-feature-title">Silence</h3>
+                        <p className="z-feature-desc">
+                            In a world of noise, we offer silence. A distraction-free interface
+                            that disappears when you don't need it.
                         </p>
                     </div>
 
-                    <div className="feature-card">
-                        <div className="feature-icon">🔒</div>
-                        <h3 className="feature-title">Private by Default</h3>
-                        <p className="feature-desc">
-                            End-to-end encryption ensures your personal moments stay exactly that—personal.
+                    <div className="z-feature-item">
+                        <span className="z-feature-number">02</span>
+                        <h3 className="z-feature-title">Privacy</h3>
+                        <p className="z-feature-desc">
+                            Your words are yours alone. End-to-end encryption ensures
+                            that your whispers remain whispers.
                         </p>
                     </div>
 
-                    <div className="feature-card">
-                        <div className="feature-icon">⚡️</div>
-                        <h3 className="feature-title">Lightning Fast</h3>
-                        <p className="feature-desc">
-                            Built on modern web technologies for instant message delivery and real-time typing indicators.
+                    <div className="z-feature-item">
+                        <span className="z-feature-number">03</span>
+                        <h3 className="z-feature-title">Focus</h3>
+                        <p className="z-feature-desc">
+                            Designed for deep work and deep connection. Tools that enhance
+                            your ability to communicate, not interrupt it.
                         </p>
                     </div>
 
-                    <div className="feature-card">
-                        <div className="feature-icon">🎨</div>
-                        <h3 className="feature-title">Expressive</h3>
-                        <p className="feature-desc">
-                            Rich media support, reactions, and beautiful typography make every message feel special.
+                    <div className="z-feature-item">
+                        <span className="z-feature-number">04</span>
+                        <h3 className="z-feature-title">Beauty</h3>
+                        <p className="z-feature-desc">
+                            Every pixel curated. A digital environment that feels as premium
+                            as a well-tailored suit.
                         </p>
                     </div>
-                </div>
+                </motion.div>
             </section>
         </div>
     );
