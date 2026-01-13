@@ -116,6 +116,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
                 id: user._id,
                 email: user.email,
                 name: user.name,
+                username: user.username,
                 avatar: user.avatar,
                 bio: user.bio,
                 status: user.status,
@@ -132,11 +133,21 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const user = req.user;
-        const { name, bio, avatar } = req.body;
+        const { name, bio, avatar, username } = req.body;
 
         if (!user) {
             res.status(401).json({ error: 'Not authenticated' });
             return;
+        }
+
+        if (username && username !== user.username) {
+            // Check if username is taken
+            const existingUser = await User.findOne({ username: username.toLowerCase(), _id: { $ne: user._id } });
+            if (existingUser) {
+                res.status(400).json({ error: 'Username already taken' });
+                return;
+            }
+            user.username = username.toLowerCase();
         }
 
         if (name) user.name = name;
@@ -151,6 +162,7 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
                 id: user._id,
                 email: user.email,
                 name: user.name,
+                username: user.username,
                 avatar: user.avatar,
                 bio: user.bio,
                 status: user.status,
@@ -165,14 +177,27 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
 export const completeProfile = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const user = req.user;
-        const { name, bio } = req.body;
+        const { name, bio, username } = req.body;
 
         if (!user) {
             res.status(401).json({ error: 'Not authenticated' });
             return;
         }
 
+        if (!username) {
+            res.status(400).json({ error: 'Username is required' });
+            return;
+        }
+
+        // Check if username is taken
+        const existingUser = await User.findOne({ username: username.toLowerCase(), _id: { $ne: user._id } });
+        if (existingUser) {
+            res.status(400).json({ error: 'Username already taken' });
+            return;
+        }
+
         user.name = name;
+        user.username = username.toLowerCase();
         if (bio) user.bio = bio;
         user.isProfileComplete = true;
         user.status = 'online';
@@ -186,6 +211,7 @@ export const completeProfile = async (req: AuthRequest, res: Response): Promise<
                 id: user._id,
                 email: user.email,
                 name: user.name,
+                username: user.username,
                 avatar: user.avatar,
                 bio: user.bio,
                 status: user.status,
@@ -214,16 +240,56 @@ export const searchUsers = async (req: AuthRequest, res: Response): Promise<void
                     $or: [
                         { name: { $regex: q, $options: 'i' } },
                         { email: { $regex: q, $options: 'i' } },
+                        { username: { $regex: q, $options: 'i' } },
                     ],
                 },
             ],
         })
-            .select('name email avatar status lastSeen')
+            .select('name email avatar status lastSeen username')
             .limit(20);
 
         res.json({ users });
     } catch (error) {
         res.status(500).json({ error: 'Search failed' });
+    }
+};
+
+// Check username availability
+export const checkUsername = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { username } = req.query;
+        const currentUserId = req.user?._id;
+
+        if (!username || typeof username !== 'string') {
+            res.status(400).json({ error: 'Username required' });
+            return;
+        }
+
+        // Validate username format
+        const usernameRegex = /^[a-z0-9_]+$/;
+        if (!usernameRegex.test(username.toLowerCase())) {
+            res.json({ available: false, error: 'Username can only contain letters, numbers, and underscores' });
+            return;
+        }
+
+        if (username.length < 3 || username.length > 30) {
+            res.json({ available: false, error: 'Username must be 3-30 characters' });
+            return;
+        }
+
+        if (username.startsWith('_') || username.endsWith('_')) {
+            res.json({ available: false, error: 'Username cannot start or end with underscore' });
+            return;
+        }
+
+        const existingUser = await User.findOne({
+            username: username.toLowerCase(),
+            _id: { $ne: currentUserId }
+        });
+
+        res.json({ available: !existingUser });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to check username' });
     }
 };
 

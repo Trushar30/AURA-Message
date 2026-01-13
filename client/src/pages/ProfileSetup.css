@@ -122,3 +122,100 @@
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
 }
+
+/* Username input styles */
+.username-input-wrapper {
+    margin-bottom: var(--spacing-2);
+}
+
+.username-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.username-prefix {
+    position: absolute;
+    left: var(--spacing-3);
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.setup-input.username-input {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    padding-left: calc(var(--spacing-3) + 1rem);
+    padding-right: calc(var(--spacing-4) + 1.5rem);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    transition: all 0.2s ease;
+}
+
+.setup-input.username-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-subtle);
+}
+
+.setup-input.username-input.valid {
+    border-color: #10b981;
+}
+
+.setup-input.username-input.valid:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.setup-input.username-input.invalid {
+    border-color: #ef4444;
+}
+
+.setup-input.username-input.invalid:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.username-status {
+    position: absolute;
+    right: var(--spacing-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.username-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.username-check {
+    color: #10b981;
+    font-weight: bold;
+    font-size: var(--font-size-lg);
+}
+
+.username-error {
+    color: #ef4444;
+    font-weight: bold;
+    font-size: var(--font-size-lg);
+}
+
+.input-success-text {
+    font-size: var(--font-size-xs);
+    color: #10b981;
+    margin-top: var(--spacing-1);
+}

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Login, Chat, AuthCallback, ProfileSetup, Landing } from './pages';
+import { Login, AuthCallback, ProfileSetup, Landing, Home, Search, Request, Teams, Settings, Profile } from './pages';
+import { AppShell } from './components/layout';
 import { useAuthStore } from './stores';
 import './styles/index.css';
 
@@ -24,7 +25,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
         return <Navigate to="/login" replace />;
     }
 
-    // Redirect to setup if profile incomplete
     if (user && !user.isProfileComplete) {
         return <Navigate to="/setup" replace />;
     }
@@ -48,7 +48,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         );
     }
 
-    return isAuthenticated ? <Navigate to="/app" replace /> : <>{children}</>;
+    return isAuthenticated ? <Navigate to="/app/home" replace /> : <>{children}</>;
 };
 
 const SetupRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -71,9 +71,8 @@ const SetupRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         return <Navigate to="/login" replace />;
     }
 
-    // Already completed setup, go to chat
     if (user?.isProfileComplete) {
-        return <Navigate to="/app" replace />;
+        return <Navigate to="/app/home" replace />;
     }
 
     return <>{children}</>;
@@ -107,14 +106,25 @@ const App: React.FC = () => {
                         </SetupRoute>
                     }
                 />
+
+                {/* Protected App Routes with AppShell */}
                 <Route
                     path="/app"
                     element={
                         <ProtectedRoute>
-                            <Chat />
+                            <AppShell />
                         </ProtectedRoute>
                     }
-                />
+                >
+                    <Route index element={<Navigate to="/app/home" replace />} />
+                    <Route path="home" element={<Home />} />
+                    <Route path="search" element={<Search />} />
+                    <Route path="request" element={<Request />} />
+                    <Route path="teams" element={<Teams />} />
+                    <Route path="settings" element={<Settings />} />
+                    <Route path="profile" element={<Profile />} />
+                </Route>
+
                 {/* Redirect unknown routes to Landing */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

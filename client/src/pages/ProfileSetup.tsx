@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../stores';
@@ -8,6 +8,7 @@ import './ProfileSetup.css';
 
 interface SetupForm {
     name: string;
+    username: string;
     bio?: string;
 }
 
@@ -16,15 +17,61 @@ export const ProfileSetup: React.FC = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+    const [usernameError, setUsernameError] = useState('');
 
-    const { register, handleSubmit, formState: { errors } } = useForm<SetupForm>({
+    const { register, handleSubmit, watch, formState: { errors } } = useForm<SetupForm>({
         defaultValues: {
             name: user?.name || '',
+            username: '',
             bio: '',
         },
     });
 
+    const usernameValue = watch('username');
+
+    // Debounced username check
+    const checkUsername = useCallback(async (username: string) => {
+        if (!username || username.length < 3) {
+            setUsernameStatus('idle');
+            return;
+        }
+
+        setUsernameStatus('checking');
+
+        try {
+            const response = await api.checkUsername(username);
+            if (response.available) {
+                setUsernameStatus('available');
+                setUsernameError('');
+            } else {
+                setUsernameStatus(response.error ? 'invalid' : 'taken');
+                setUsernameError(response.error || 'Username is already taken');
+            }
+        } catch (err) {
+            setUsernameStatus('idle');
+        }
+    }, []);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (usernameValue && usernameValue.length >= 3) {
+                checkUsername(usernameValue);
+            } else {
+                setUsernameStatus('idle');
+                setUsernameError('');
+            }
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [usernameValue, checkUsername]);
+
     const onSubmit = async (data: SetupForm) => {
+        if (usernameStatus !== 'available') {
+            setError('Please choose a valid username');
+            return;
+        }
+
         setError('');
         setIsLoading(true);
 
@@ -36,6 +83,20 @@ export const ProfileSetup: React.FC = () => {
             setError(err.message || 'Failed to complete setup');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const getUsernameStatusIcon = () => {
+        switch (usernameStatus) {
+            case 'checking':
+                return <div className="username-spinner" />;
+            case 'available':
+                return <span className="username-check">✓</span>;
+            case 'taken':
+            case 'invalid':
+                return <span className="username-error">✗</span>;
+            default:
+                return null;
         }
     };
 
@@ -75,6 +136,39 @@ export const ProfileSetup: React.FC = () => {
                         error={errors.name?.message}
                     />
 
+                    <div className="input-wrapper username-input-wrapper">
+                        <label className="input-label">Username</label>
+                        <div className="username-input-container">
+                            <span className="username-prefix">@</span>
+                            <input
+                                className={`setup-input username-input ${usernameStatus === 'available' ? 'valid' : ''} ${usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'invalid' : ''}`}
+                                placeholder="your_username"
+                                {...register('username', {
+                                    required: 'Username is required',
+                                    minLength: { value: 3, message: 'Username must be at least 3 characters' },
+                                    maxLength: { value: 30, message: 'Username must be less than 30 characters' },
+                                    pattern: {
+                                        value: /^[a-z0-9_]+$/,
+                                        message: 'Only lowercase letters, numbers, and underscores'
+                                    },
+                                    validate: {
+                                        noStartUnderscore: v => !v.startsWith('_') || 'Cannot start with underscore',
+                                        noEndUnderscore: v => !v.endsWith('_') || 'Cannot end with underscore'
+                                    }
+                                })}
+                            />
+                            <div className="username-status">
+                                {getUsernameStatusIcon()}
+                            </div>
+                        </div>
+                        {(errors.username?.message || usernameError) && (
+                            <span className="input-error-text">{errors.username?.message || usernameError}</span>
+                        )}
+                        {usernameStatus === 'available' && (
+                            <span className="input-success-text">Username is available!</span>
+                        )}
+                    </div>
+
                     <div className="input-wrapper">
                         <label className="input-label">Bio (optional)</label>
                         <textarea
@@ -88,7 +182,7 @@ export const ProfileSetup: React.FC = () => {
                         {errors.bio && <span className="input-error-text">{errors.bio.message}</span>}
                     </div>
 
-                    <Button type="submit" isLoading={isLoading}>
+                    <Button type="submit" isLoading={isLoading} disabled={usernameStatus !== 'available'}>
                         Get Started
                     </Button>
                 </form>

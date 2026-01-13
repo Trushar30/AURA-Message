@@ -1,0 +1,177 @@
+.search-page {
+    padding: 2rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.search-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.search-header {
+    margin-bottom: 2rem;
+}
+
+.search-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.search-header p {
+    color: var(--color-text-secondary);
+}
+
+.search-form {
+    margin-bottom: 2rem;
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.search-input-group svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-tertiary);
+}
+
+.search-input-group input {
+    flex: 1;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+}
+
+.search-input-group button {
+    padding: 0.5rem 1.25rem;
+    background: var(--color-accent);
+    color: var(--color-bg-primary);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.search-input-group button:disabled {
+    opacity: 0.6;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.user-card-info {
+    margin: 1rem 0;
+}
+
+.user-card-info h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.user-card-info p {
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+}
+
+.user-card-info .username {
+    color: var(--color-accent);
+    font-weight: 500;
+}
+
+/* Action buttons */
+.action-btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.action-btn.add-friend {
+    background: var(--color-accent);
+    color: var(--color-bg-primary);
+}
+
+.action-btn.add-friend:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+}
+
+.action-btn.pending {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.action-btn.pending:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.action-btn.accept {
+    background: #10b981;
+    color: white;
+}
+
+.action-btn.accept:hover {
+    background: #059669;
+}
+
+.action-btn.message {
+    background: var(--color-accent);
+    color: var(--color-bg-primary);
+}
+
+.action-btn.message:hover {
+    opacity: 0.9;
+}
+
+.action-btn.loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.search-placeholder,
+.no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    text-align: center;
+    color: var(--color-text-tertiary);
+}
+
+.search-placeholder svg,
+.no-results svg {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}

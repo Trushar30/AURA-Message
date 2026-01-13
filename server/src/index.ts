@@ -4,7 +4,7 @@ import cors from 'cors';
 import { config } from './config/index.js';
 import { connectDB } from './config/database.js';
 import passport from './config/passport.js';
-import { authRoutes, conversationRoutes, messageRoutes } from './routes/index.js';
+import { authRoutes, conversationRoutes, messageRoutes, friendRoutes } from './routes/index.js';
 import { errorHandler, notFound } from './middleware/index.js';
 import { initializeSocket } from './socket/index.js';
 
@@ -32,6 +32,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Error handling
 app.use(notFound);

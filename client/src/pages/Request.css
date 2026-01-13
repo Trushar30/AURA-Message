@@ -1,0 +1,225 @@
+.request-page {
+    padding: 2rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.request-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-header p {
+    color: var(--color-text-secondary);
+}
+
+.requests-section {
+    margin-bottom: 2rem;
+}
+
+.requests-section h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--color-accent);
+    color: var(--color-bg-primary);
+    border-radius: var(--radius-full);
+}
+
+.badge.secondary {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.request-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+}
+
+.request-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.request-card.sent {
+    opacity: 0.8;
+}
+
+.request-info {
+    flex: 1;
+}
+
+.request-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.request-info .username {
+    font-size: 0.875rem;
+    color: var(--color-accent);
+    font-weight: 500;
+}
+
+.request-info .time {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    margin-top: 2px;
+}
+
+.request-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.accept-btn {
+    padding: 0.5rem 1rem;
+    background: #10b981;
+    color: white;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.accept-btn:hover:not(:disabled) {
+    background: #059669;
+}
+
+.accept-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.reject-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.reject-btn:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.reject-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    background: var(--color-bg-secondary);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: 0.875rem;
+}
+
+/* Loading state */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    gap: 1rem;
+    color: var(--color-text-tertiary);
+}
+
+.loading-state .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

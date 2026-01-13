@@ -6,6 +6,7 @@ export interface IUser extends Document {
     email: string;
     password?: string;
     name: string;
+    username?: string;
     avatar?: string;
     bio?: string;
     status: 'online' | 'offline' | 'away' | 'busy';
@@ -13,6 +14,7 @@ export interface IUser extends Document {
     googleId?: string;
     isVerified: boolean;
     isProfileComplete: boolean;
+    friends: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
@@ -37,6 +39,24 @@ const userSchema = new Schema<IUser>(
             required: true,
             trim: true,
             maxlength: 50,
+        },
+        username: {
+            type: String,
+            unique: true,
+            sparse: true,
+            lowercase: true,
+            trim: true,
+            minlength: 3,
+            maxlength: 30,
+            match: [/^[a-z0-9_]+$/, 'Username can only contain lowercase letters, numbers, and underscores'],
+            validate: {
+                validator: function (v: string) {
+                    if (!v) return true; // Allow empty during initial registration
+                    // Cannot start or end with underscore
+                    return !v.startsWith('_') && !v.endsWith('_');
+                },
+                message: 'Username cannot start or end with underscore'
+            }
         },
         avatar: {
             type: String,
@@ -66,8 +86,12 @@ const userSchema = new Schema<IUser>(
         },
         isProfileComplete: {
             type: Boolean,
-            default: true,
+            default: false,
         },
+        friends: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }],
     },
     {
         timestamps: true,
@@ -94,6 +118,6 @@ userSchema.methods.comparePassword = async function (
 };
 
 // Index for search
-userSchema.index({ name: 'text', email: 'text' });
+userSchema.index({ name: 'text', email: 'text', username: 'text' });
 
 export const User = mongoose.model<IUser>('User', userSchema);

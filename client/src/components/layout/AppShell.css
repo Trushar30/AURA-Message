@@ -1,0 +1,218 @@
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-bg-primary);
+}
+
+/* Sidebar */
+.app-sidebar {
+    width: 260px;
+    background-color: var(--color-bg-secondary);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: width 0.3s ease;
+}
+
+.sidebar-collapsed .app-sidebar {
+    width: 72px;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.brand-logo {
+    width: 32px;
+    height: 32px;
+}
+
+.brand-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* Navigation */
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.nav-item.active {
+    background-color: var(--color-accent-subtle);
+    color: var(--color-accent);
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.nav-label {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.sidebar-collapsed .nav-item {
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-email {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logout-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    color: var(--color-text-tertiary);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.logout-btn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.logout-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sidebar-collapsed .user-info {
+    display: none;
+}
+
+/* Collapse Button */
+.collapse-btn {
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-tertiary);
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.collapse-btn:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.collapse-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Main Content */
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-sidebar {
+        width: 72px;
+    }
+
+    .brand-name,
+    .nav-label,
+    .user-info {
+        display: none;
+    }
+
+    .nav-item {
+        justify-content: center;
+        padding: 0.75rem;
+    }
+
+    .collapse-btn {
+        display: none;
+    }
+}

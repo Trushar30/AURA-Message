@@ -63,7 +63,7 @@ class ApiService {
         return this.request<{ user: any }>('/auth/me');
     }
 
-    async updateProfile(data: { name?: string; bio?: string; avatar?: string }) {
+    async updateProfile(data: { name?: string; bio?: string; avatar?: string; username?: string }) {
         return this.request<{ user: any }>('/auth/profile', {
             method: 'PATCH',
             body: JSON.stringify(data),
@@ -74,15 +74,66 @@ class ApiService {
         return this.request<{ users: any[] }>(`/auth/search?q=${encodeURIComponent(query)}`);
     }
 
+    async checkUsername(username: string) {
+        return this.request<{ available: boolean; error?: string }>(`/auth/check-username?username=${encodeURIComponent(username)}`);
+    }
+
     async logout() {
         return this.request<{ message: string }>('/auth/logout', { method: 'POST' });
     }
 
-    async completeProfile(data: { name: string; bio?: string }) {
+    async completeProfile(data: { name: string; username: string; bio?: string }) {
         return this.request<{ user: any }>('/auth/complete-profile', {
             method: 'POST',
             body: JSON.stringify(data),
         });
+    }
+
+    // Friends
+    async sendFriendRequest(userId: string) {
+        return this.request<{ message: string; request: any }>(`/friends/request/${userId}`, {
+            method: 'POST',
+        });
+    }
+
+    async acceptFriendRequest(requestId: string) {
+        return this.request<{ message: string }>(`/friends/accept/${requestId}`, {
+            method: 'POST',
+        });
+    }
+
+    async rejectFriendRequest(requestId: string) {
+        return this.request<{ message: string }>(`/friends/reject/${requestId}`, {
+            method: 'POST',
+        });
+    }
+
+    async cancelFriendRequest(requestId: string) {
+        return this.request<{ message: string }>(`/friends/cancel/${requestId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getPendingRequests() {
+        return this.request<{ requests: any[] }>('/friends/pending');
+    }
+
+    async getSentRequests() {
+        return this.request<{ requests: any[] }>('/friends/sent');
+    }
+
+    async getFriends() {
+        return this.request<{ friends: any[] }>('/friends');
+    }
+
+    async removeFriend(userId: string) {
+        return this.request<{ message: string }>(`/friends/${userId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async getFriendshipStatus(userId: string) {
+        return this.request<{ status: string; requestId?: string }>(`/friends/status/${userId}`);
     }
 
     // Conversations
@@ -161,3 +212,4 @@ class ApiService {
 }
 
 export const api = new ApiService();
+

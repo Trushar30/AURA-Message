@@ -15,7 +15,7 @@ interface AuthStore {
     updateProfile: (data: { name?: string; bio?: string; avatar?: string }) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
+export const useAuthStore = create<AuthStore>((set) => ({
     user: null,
     token: null,
     isAuthenticated: false,

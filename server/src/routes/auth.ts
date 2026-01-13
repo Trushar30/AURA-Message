@@ -12,6 +12,7 @@ import {
     searchUsers,
     logout,
     completeProfile,
+    checkUsername,
 } from '../controllers/index.js';
 
 const router = Router();
@@ -42,6 +43,7 @@ const updateProfileSchema = z.object({
 const completeProfileSchema = z.object({
     body: z.object({
         name: z.string().min(2).max(50),
+        username: z.string().min(3).max(30).regex(/^[a-z0-9_]+$/),
         bio: z.string().max(200).optional(),
     }),
 });
@@ -77,6 +79,7 @@ router.get('/me', authenticate as any, getMe as any);
 router.patch('/profile', authenticate as any, validate(updateProfileSchema), updateProfile as any);
 router.post('/complete-profile', authenticate as any, validate(completeProfileSchema), completeProfile as any);
 router.get('/search', authenticate as any, searchUsers as any);
+router.get('/check-username', authenticate as any, checkUsername as any);
 router.post('/logout', authenticate as any, logout as any);
 
 export default router;
