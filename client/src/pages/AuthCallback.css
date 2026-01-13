@@ -1,0 +1,44 @@
+.auth-callback {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-primary);
+}
+
+.callback-content {
+    text-align: center;
+    animation: fadeInUp var(--transition-slow) ease-out;
+}
+
+.callback-logo {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #6366f1 100%);
+    border-radius: var(--radius-xl);
+    margin: 0 auto var(--spacing-6);
+    box-shadow: var(--shadow-glow);
+}
+
+.callback-logo img {
+    width: 48px;
+    height: 48px;
+}
+
+.callback-text {
+    color: var(--color-text-secondary);
+    margin-top: var(--spacing-4);
+}
+
+.callback-error {
+    color: #ef4444;
+    margin-bottom: var(--spacing-2);
+}
+
+.callback-redirect {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}

@@ -1,0 +1,123 @@
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Sizes */
+.btn-sm {
+    height: 32px;
+    padding: 0 var(--spacing-3);
+    font-size: var(--font-size-sm);
+}
+
+.btn-md {
+    height: 40px;
+    padding: 0 var(--spacing-4);
+    font-size: var(--font-size-base);
+}
+
+.btn-lg {
+    height: 48px;
+    padding: 0 var(--spacing-6);
+    font-size: var(--font-size-lg);
+}
+
+/* Variants */
+.btn-primary {
+    background: var(--color-message-sent);
+    color: var(--color-text-primary);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--color-surface-light);
+    border-color: var(--color-border-hover);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+/* Loading */
+.btn-loading {
+    color: transparent;
+}
+
+.btn-spinner {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-spinner svg {
+    width: 18px;
+    height: 18px;
+    animation: spin 1s linear infinite;
+    color: var(--color-text-primary);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Icon */
+.btn-icon {
+    display: flex;
+    align-items: center;
+}
+
+.btn-icon svg {
+    width: 18px;
+    height: 18px;
+}
