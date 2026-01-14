@@ -1,7 +1,10 @@
 .app-shell {
     display: flex;
-    min-height: 100vh;
+    height: 100%;
+    /* Fix height to viewport */
     background-color: var(--color-bg-primary);
+    overflow: hidden;
+    /* Prevent window scroll */
 }
 
 /* Sidebar */

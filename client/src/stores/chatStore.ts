@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Conversation, Message, TypingUser } from '../types';
 import { api } from '../services/api';
 import { socketService } from '../services/socket';
+import { useAuthStore } from './authStore';
 
 interface ChatStore {
     conversations: Conversation[];
@@ -20,6 +21,7 @@ interface ChatStore {
     updateConversation: (conversation: Conversation) => void;
     addTypingUser: (user: TypingUser) => void;
     removeTypingUser: (userId: string, conversationId: string) => void;
+    updateMessageReadStatus: (messageIds: string[], userId: string, readAt: string) => void;
     createDirectConversation: (recipientId: string) => Promise<Conversation>;
     createGroupConversation: (name: string, participantIds: string[], description?: string) => Promise<Conversation>;
 }
@@ -59,9 +61,20 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             const response = await api.getMessages(conversationId);
             set({ messages: response.messages });
 
-            // Mark messages as delivered/read
+            // Get current user ID from authStore
+            const currentUser = useAuthStore.getState().user;
+            const currentUserId = currentUser?.id || (currentUser as any)?._id;
+
+            if (!currentUserId) return;
+
+            // Find all message IDs from other users (messages we need to mark as read)
             const unreadIds = response.messages
-                .filter((m: Message) => m.sender.id !== get().activeConversation?.participants[0]?.user?.id)
+                .filter((m: Message) => {
+                    // Get sender ID (handle both id and _id)
+                    const senderId = m.sender.id || (m.sender as any)?._id;
+                    // Only mark messages from OTHER users as read
+                    return senderId !== currentUserId;
+                })
                 .map((m: Message) => m._id);
 
             if (unreadIds.length > 0) {
@@ -163,5 +176,23 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             conversations: [response.conversation, ...state.conversations],
         }));
         return response.conversation;
+    },
+
+    updateMessageReadStatus: (messageIds, userId, readAt) => {
+        set((state) => ({
+            messages: state.messages.map((msg) => {
+                if (messageIds.includes(msg._id)) {
+                    // Check if already read by this user
+                    const alreadyRead = msg.readBy.some((r) => r.user === userId);
+                    if (alreadyRead) return msg;
+
+                    return {
+                        ...msg,
+                        readBy: [...msg.readBy, { user: userId, readAt }],
+                    };
+                }
+                return msg;
+            }),
+        }));
     },
 }));

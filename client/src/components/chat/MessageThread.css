@@ -75,10 +75,12 @@
 .messages-container {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: var(--spacing-4) var(--spacing-5);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-1);
+    min-height: 0;
 }
 
 .loading-messages {
@@ -138,11 +140,36 @@
 }
 
 /* Message */
+/* Message */
 .message {
     display: flex;
     gap: var(--spacing-2);
     max-width: var(--message-max-width);
-    animation: fadeInUp var(--transition-fast) ease-out;
+    width: 100%;
+    margin-bottom: 2px;
+    position: relative;
+    /* Ensure messages don't overlap */
+    z-index: 1;
+}
+
+.message.has-avatar {
+    margin-top: var(--spacing-2);
+}
+
+.message-appear {
+    animation: messageSlideIn var(--transition-fast) cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message-sent {
@@ -167,6 +194,9 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-1);
+    max-width: 100%;
+    min-width: 0;
+    /* overflow: hidden; - Removed to allow info popup to show */
 }
 
 .message-sent .message-content {
@@ -184,6 +214,13 @@
     padding: var(--spacing-2) var(--spacing-3);
     border-radius: var(--radius-xl);
     max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-word;
+    /* Standard */
+    overflow-wrap: anywhere;
+    /* Stronger break for long URLs/strings */
+    hyphens: auto;
 }
 
 .message-sent .message-bubble {
@@ -199,6 +236,8 @@
 .message-bubble p {
     word-break: break-word;
     white-space: pre-wrap;
+    overflow-wrap: break-word;
+    margin: 0;
 }
 
 .message-deleted {
@@ -211,6 +250,7 @@
     align-items: center;
     gap: var(--spacing-1);
     padding: 0 var(--spacing-1);
+    position: relative;
 }
 
 .message-time {
@@ -218,20 +258,387 @@
     color: var(--color-text-muted);
 }
 
-.message-status svg {
+.message-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-icon {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: statusAppear 0.3s ease-out;
+}
+
+.status-icon svg {
     width: 14px;
     height: 14px;
+    transition: all 0.3s ease;
+}
+
+/* Sent Status - Single check with subtle color */
+.status-icon.sent svg {
     color: var(--color-text-muted);
 }
 
-.message-status svg.read {
-    color: var(--color-accent);
+.status-icon.sent {
+    animation: sentPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Delivered Status - Double check with gradient */
+.status-icon.delivered svg {
+    color: #64B5F6;
+}
+
+.status-icon.delivered .check-1,
+.status-icon.delivered .check-2,
+.status-icon.delivered .check-3 {
+    animation: checkDraw 0.5s ease-out forwards;
+}
+
+.status-icon.delivered .check-2 {
+    animation-delay: 0.1s;
+}
+
+.status-icon.delivered .check-3 {
+    animation-delay: 0.2s;
+}
+
+/* Seen Status - Eye icon with glow effect */
+.status-icon.seen {
+    color: #4CAF50;
+}
+
+.status-icon.seen svg {
+    color: #4CAF50;
+    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.5));
+    animation: seenGlow 2s ease-in-out infinite alternate;
+}
+
+.status-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #4CAF50;
+    opacity: 0;
+    animation: labelFade 0.4s ease forwards 0.2s;
+}
+
+/* Animations */
+@keyframes statusAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes sentPop {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes checkDraw {
+    from {
+        stroke-dasharray: 20;
+        stroke-dashoffset: 20;
+    }
+
+    to {
+        stroke-dasharray: 20;
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes seenGlow {
+    from {
+        filter: drop-shadow(0 0 2px rgba(76, 175, 80, 0.3));
+    }
+
+    to {
+        filter: drop-shadow(0 0 6px rgba(76, 175, 80, 0.6));
+    }
+}
+
+@keyframes labelFade {
+    from {
+        opacity: 0;
+        transform: translateX(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .message-edited {
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
     font-style: italic;
+}
+
+/* Info Button - Unique Orbiting Style */
+.message-info-btn {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.message-info-btn:hover {
+    opacity: 1;
+    transform: rotate(15deg) scale(1.2);
+}
+
+.message-info-btn svg {
+    width: 100%;
+    height: 100%;
+    color: var(--color-text-muted);
+    transition: color 0.3s ease;
+}
+
+.message-info-btn:hover svg {
+    color: var(--color-accent);
+}
+
+/* Orbiting animation on hover */
+.message-info-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    border: 1px dashed var(--color-accent);
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+    transition: all 0.3s ease;
+}
+
+.message-info-btn:hover::before {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+    animation: orbit 3s linear infinite;
+}
+
+@keyframes orbit {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Info Popup - Glassmorphism Style */
+.message-info-popup {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 8px;
+    width: 280px;
+    background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.98));
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    z-index: 100;
+    animation: popupSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popupSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.info-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, rgba(var(--color-accent-rgb), 0.15), transparent);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.info-popup-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.7));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.info-popup-close {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.info-popup-close:hover {
+    background: rgba(255, 80, 80, 0.2);
+}
+
+.info-popup-close svg {
+    width: 14px;
+    height: 14px;
+    color: var(--color-text-muted);
+}
+
+.info-popup-close:hover svg {
+    color: #ff6b6b;
+}
+
+.info-popup-content {
+    padding: 8px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+}
+
+/* Sent Info - Purple accent */
+.sent-info {
+    background: rgba(156, 39, 176, 0.08);
+}
+
+.sent-info::before {
+    background: linear-gradient(to bottom, #9c27b0, #7b1fa2);
+}
+
+.sent-info .info-icon {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.1));
+    color: #ba68c8;
+}
+
+/* Delivered Info - Blue accent */
+.delivered-info {
+    background: rgba(33, 150, 243, 0.08);
+}
+
+.delivered-info::before {
+    background: linear-gradient(to bottom, #2196F3, #1976D2);
+}
+
+.delivered-info .info-icon {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(33, 150, 243, 0.1));
+    color: #64B5F6;
+}
+
+/* Seen Info - Green accent */
+.seen-info {
+    background: rgba(76, 175, 80, 0.08);
+}
+
+.seen-info::before {
+    background: linear-gradient(to bottom, #4CAF50, #388E3C);
+}
+
+.seen-info .info-icon {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+    color: #81C784;
+}
+
+.info-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.info-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.info-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-time {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* Typing Indicator */

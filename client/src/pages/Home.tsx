@@ -16,7 +16,7 @@ interface Friend {
 
 export const Home: React.FC = () => {
     const { } = useAuthStore();
-    const { fetchConversations, addMessage, addTypingUser, removeTypingUser } = useChatStore();
+    const { fetchConversations, addMessage, addTypingUser, removeTypingUser, updateMessageReadStatus } = useChatStore();
     const [showNewChat, setShowNewChat] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [friends, setFriends] = useState<Friend[]>([]);
@@ -46,13 +46,19 @@ export const Home: React.FC = () => {
             });
         });
 
+        // Subscribe to read receipts
+        const unsubRead = socketService.onMessageRead((data) => {
+            updateMessageReadStatus(data.messageIds, data.userId, new Date().toISOString());
+        });
+
         return () => {
             unsubMessage();
             unsubTypingStart();
             unsubTypingStop();
             unsubOffline();
+            unsubRead();
         };
-    }, [fetchConversations, addMessage, addTypingUser, removeTypingUser]);
+    }, [fetchConversations, addMessage, addTypingUser, removeTypingUser, updateMessageReadStatus]);
 
     const fetchFriends = async () => {
         try {

@@ -11,6 +11,7 @@ export const MessageThread: React.FC = () => {
     const { activeConversation, messages, isLoadingMessages } = useChatStore();
     const [newMessage, setNewMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [activeInfoId, setActiveInfoId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
@@ -117,21 +118,107 @@ export const MessageThread: React.FC = () => {
                                 {format(new Date(message.createdAt), 'HH:mm')}
                             </span>
                             {isMine && (
-                                <span className="message-status">
-                                    {message.readBy.length > 1 ? (
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="read">
-                                            <path d="M18 7l-8.156 8.156M2 12l5.156 5.156M7 12l5.156 5.156" />
-                                        </svg>
-                                    ) : message.deliveredTo.length > 1 ? (
+                                <>
+                                    <span className={`message-status ${message.readBy.length > 1 ? 'status-seen' : message.deliveredTo.length > 1 ? 'status-delivered' : 'status-sent'}`}>
+                                        {message.readBy.length > 1 ? (
+                                            // Seen - Eye icon with glow
+                                            <div className="status-icon seen">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <path d="M12 5C5.636 5 2 12 2 12s3.636 7 10 7 10-7 10-7-3.636-7-10-7Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                                                </svg>
+                                            </div>
+                                        ) : message.deliveredTo.length > 1 ? (
+                                            // Delivered - Double check with animation
+                                            <div className="status-icon delivered">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <path className="check-1" d="M2 12l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                    <path className="check-2" d="M7 17l10-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                    <path className="check-3" d="M12 12l5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                                </svg>
+                                            </div>
+                                        ) : (
+                                            // Sent - Single check with pop animation
+                                            <div className="status-icon sent">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <path d="M5 12l5 5L20 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            </div>
+                                        )}
+                                    </span>
+                                    {/* Info Button */}
+                                    <button
+                                        className="message-info-btn"
+                                        onClick={() => setActiveInfoId(activeInfoId === message._id ? null : message._id)}
+                                    >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M18 7l-8.156 8.156M2 12l5.156 5.156M7 12l5.156 5.156" />
+                                            <circle cx="12" cy="12" r="10" />
+                                            <path d="M12 16v-4M12 8h.01" />
                                         </svg>
-                                    ) : (
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M5 12l5 5L20 7" />
-                                        </svg>
+                                    </button>
+                                    {/* Info Popup */}
+                                    {activeInfoId === message._id && (
+                                        <div className="message-info-popup">
+                                            <div className="info-popup-header">
+                                                <span className="info-popup-title">Message Info</span>
+                                                <button className="info-popup-close" onClick={() => setActiveInfoId(null)}>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M18 6L6 18M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div className="info-popup-content">
+                                                <div className="info-item sent-info">
+                                                    <div className="info-icon">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M22 2L11 13" />
+                                                            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div className="info-details">
+                                                        <span className="info-label">Sent</span>
+                                                        <span className="info-time">{format(new Date(message.createdAt), 'MMM d, yyyy • HH:mm:ss')}</span>
+                                                    </div>
+                                                </div>
+                                                {message.deliveredTo.length > 1 && (
+                                                    <div className="info-item delivered-info">
+                                                        <div className="info-icon">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                <path d="M2 12l5 5M7 17l10-10M12 12l5-5" />
+                                                            </svg>
+                                                        </div>
+                                                        <div className="info-details">
+                                                            <span className="info-label">Delivered</span>
+                                                            <span className="info-time">
+                                                                {message.deliveredTo[1]?.deliveredAt
+                                                                    ? format(new Date(message.deliveredTo[1].deliveredAt), 'MMM d, yyyy • HH:mm:ss')
+                                                                    : 'Delivered'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {message.readBy.length > 1 && (
+                                                    <div className="info-item seen-info">
+                                                        <div className="info-icon">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                                <path d="M12 5C5.636 5 2 12 2 12s3.636 7 10 7 10-7 10-7-3.636-7-10-7Z" />
+                                                                <circle cx="12" cy="12" r="3" />
+                                                            </svg>
+                                                        </div>
+                                                        <div className="info-details">
+                                                            <span className="info-label">Seen</span>
+                                                            <span className="info-time">
+                                                                {message.readBy[1]?.readAt
+                                                                    ? format(new Date(message.readBy[1].readAt), 'MMM d, yyyy • HH:mm:ss')
+                                                                    : 'Seen'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     )}
-                                </span>
+                                </>
                             )}
                             {message.isEdited && <span className="message-edited">edited</span>}
                         </div>
