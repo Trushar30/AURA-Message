@@ -148,3 +148,112 @@
     background: var(--color-accent);
     color: white;
 }
+
+/* Search Bar */
+.conversation-search {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.search-input-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+.search-input-container:focus-within {
+    background: var(--color-bg-primary);
+    box-shadow: 0 0 0 2px var(--color-accent-subtle);
+}
+
+.search-input-container svg {
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.search-input-container input {
+    flex: 1;
+    background: none;
+    border: none;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.search-input-container input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.search-clear {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+}
+
+.search-clear:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.search-clear svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Friends Section Divider */
+.friends-section-divider {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-3) var(--spacing-4);
+    margin-top: var(--spacing-2);
+}
+
+.friends-section-divider span {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+
+.friends-section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+    margin-left: var(--spacing-3);
+}
+
+/* Friend Item */
+.friend-item {
+    opacity: 0.9;
+}
+
+.friend-item:hover {
+    opacity: 1;
+}
+
+.friend-username {
+    color: var(--color-text-muted) !important;
+}
+
+.start-chat-badge {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-accent);
+    background: var(--color-accent-subtle);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}

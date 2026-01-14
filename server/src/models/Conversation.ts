@@ -82,14 +82,6 @@ const conversationSchema = new Schema<IConversation>(
 // Index for finding user's conversations
 conversationSchema.index({ 'participants.user': 1 });
 conversationSchema.index({ updatedAt: -1 });
-
-// Ensure direct conversations are unique between two users
-conversationSchema.index(
-    { type: 1, 'participants.user': 1 },
-    {
-        unique: true,
-        partialFilterExpression: { type: 'direct' }
-    }
-);
+conversationSchema.index({ type: 1, 'participants.user': 1 });
 
 export const Conversation = mongoose.model<IConversation>('Conversation', conversationSchema);

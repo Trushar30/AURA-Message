@@ -8,7 +8,7 @@ import './MessageThread.css';
 
 export const MessageThread: React.FC = () => {
     const { user } = useAuthStore();
-    const { activeConversation, messages, typingUsers, isLoadingMessages } = useChatStore();
+    const { activeConversation, messages, isLoadingMessages } = useChatStore();
     const [newMessage, setNewMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -25,7 +25,11 @@ export const MessageThread: React.FC = () => {
 
     const getOtherParticipant = () => {
         if (!activeConversation || activeConversation.type === 'group') return null;
-        return activeConversation.participants.find((p) => p.user.id !== user?.id)?.user;
+        const currentUserId = user?.id || (user as any)?._id;
+        return activeConversation.participants.find((p) => {
+            const participantId = p.user.id || (p.user as any)?._id;
+            return participantId !== currentUserId;
+        })?.user;
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -75,10 +79,16 @@ export const MessageThread: React.FC = () => {
     };
 
     const renderMessage = (message: Message, index: number) => {
-        const isMine = message.sender.id === user?.id;
-        const showAvatar = index === 0 || messages[index - 1]?.sender.id !== message.sender.id;
+        const currentUserId = user?.id || (user as any)?._id;
+        const senderId = message.sender.id || (message.sender as any)?._id;
+        const isMine = senderId === currentUserId;
+
+        const prevSenderId = messages[index - 1]?.sender.id || (messages[index - 1]?.sender as any)?._id;
+        const nextSenderId = messages[index + 1]?.sender.id || (messages[index + 1]?.sender as any)?._id;
+
+        const showAvatar = index === 0 || prevSenderId !== senderId;
         const showTime = index === messages.length - 1 ||
-            messages[index + 1]?.sender.id !== message.sender.id ||
+            nextSenderId !== senderId ||
             new Date(messages[index + 1]?.createdAt).getTime() - new Date(message.createdAt).getTime() > 300000;
 
         return (
@@ -148,9 +158,6 @@ export const MessageThread: React.FC = () => {
     }
 
     const otherUser = getOtherParticipant();
-    const conversationTypers = typingUsers.filter(
-        (t) => t.conversationId === activeConversation._id
-    );
 
     return (
         <div className="message-thread">
@@ -177,11 +184,7 @@ export const MessageThread: React.FC = () => {
                             : otherUser?.name || 'Unknown'}
                     </h3>
                     <span className="thread-status">
-                        {conversationTypers.length > 0 ? (
-                            <span className="typing-text">
-                                {conversationTypers.map((t) => t.userName).join(', ')} typing...
-                            </span>
-                        ) : activeConversation.type === 'group' ? (
+                        {activeConversation.type === 'group' ? (
                             `${activeConversation.participants.length} members`
                         ) : otherUser?.status === 'online' ? (
                             'Online'
@@ -197,19 +200,21 @@ export const MessageThread: React.FC = () => {
                     <div className="loading-messages">
                         <div className="loading-spinner" />
                     </div>
+                ) : messages.length === 0 ? (
+                    <div className="empty-chat-state">
+                        <div className="empty-chat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </div>
+                        <h4>Start the conversation</h4>
+                        <p>Send a message to {otherUser?.name || 'start chatting'}</p>
+                    </div>
                 ) : (
                     <>
                         {messages.map((message, index) => renderMessage(message, index))}
 
-                        {conversationTypers.length > 0 && (
-                            <div className="typing-indicator">
-                                <div className="typing-dots">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </div>
-                            </div>
-                        )}
+
 
                         <div ref={messagesEndRef} />
                     </>

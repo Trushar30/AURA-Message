@@ -49,8 +49,16 @@ export const createDirectConversation = async (req: AuthRequest, res: Response):
         const userId = req.user?._id;
         const { recipientId } = req.body;
 
+        console.log('Creating conversation - userId:', userId?.toString(), 'recipientId:', recipientId);
+
         if (!recipientId) {
             res.status(400).json({ error: 'Recipient ID required' });
+            return;
+        }
+
+        // Prevent creating conversation with yourself
+        if (userId?.toString() === recipientId) {
+            res.status(400).json({ error: 'Cannot create conversation with yourself' });
             return;
         }
 
@@ -61,11 +69,19 @@ export const createDirectConversation = async (req: AuthRequest, res: Response):
             return;
         }
 
-        // Check if conversation already exists
+        // Check if conversation already exists between exactly these two users
+        const recipientObjectId = new mongoose.Types.ObjectId(recipientId);
+
         const existingConversation = await Conversation.findOne({
             type: 'direct',
-            'participants.user': { $all: [userId, recipientId] },
+            participants: { $size: 2 },
+            $and: [
+                { 'participants.user': userId },
+                { 'participants.user': recipientObjectId }
+            ]
         }).populate('participants.user', 'name email avatar status lastSeen');
+
+        console.log('Existing conversation found:', existingConversation?._id?.toString() || 'none');
 
         if (existingConversation) {
             res.json({ conversation: existingConversation });
@@ -77,7 +93,7 @@ export const createDirectConversation = async (req: AuthRequest, res: Response):
             type: 'direct',
             participants: [
                 { user: userId, role: 'member' },
-                { user: recipientId, role: 'member' },
+                { user: recipientObjectId, role: 'member' },
             ],
             createdBy: userId,
         });
@@ -88,7 +104,31 @@ export const createDirectConversation = async (req: AuthRequest, res: Response):
         );
 
         res.status(201).json({ conversation: populatedConversation });
-    } catch (error) {
+    } catch (error: any) {
+        console.error('Create conversation error:', error);
+        // Handle duplicate key error (E11000)
+        if (error.code === 11000) {
+            // Conversation already exists, try to find and return it
+            try {
+                const userId = req.user?._id;
+                const { recipientId } = req.body;
+                const existingConversation = await Conversation.findOne({
+                    type: 'direct',
+                    participants: { $size: 2 },
+                    $and: [
+                        { 'participants.user': userId },
+                        { 'participants.user': new mongoose.Types.ObjectId(recipientId) }
+                    ]
+                }).populate('participants.user', 'name email avatar status lastSeen');
+
+                if (existingConversation) {
+                    res.json({ conversation: existingConversation });
+                    return;
+                }
+            } catch (e) {
+                console.error('Error finding existing conversation:', e);
+            }
+        }
         res.status(500).json({ error: 'Failed to create conversation' });
     }
 };
