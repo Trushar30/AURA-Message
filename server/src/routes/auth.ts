@@ -38,6 +38,7 @@ const updateProfileSchema = z.object({
         name: z.string().min(2).max(50).optional(),
         bio: z.string().max(200).optional(),
         avatar: z.string().url().optional().or(z.literal('')),
+        username: z.string().min(3).max(30).regex(/^[a-z0-9_]+$/).optional(),
     }),
 });
 

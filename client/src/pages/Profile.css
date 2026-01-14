@@ -41,6 +41,13 @@
     margin-top: 1rem;
 }
 
+.profile-username {
+    font-size: 1rem;
+    color: var(--color-accent);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
 .profile-email {
     font-size: 0.9375rem;
     color: var(--color-text-tertiary);
@@ -71,8 +78,21 @@
 
 .profile-edit-form {
     width: 100%;
-    max-width: 300px;
+    max-width: 360px;
     margin-top: 1rem;
+}
+
+.input-group {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
 }
 
 .name-input,
@@ -84,22 +104,142 @@
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
     font-size: 1rem;
-    margin-bottom: 0.75rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.name-input:focus,
+.bio-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
 }
 
 .bio-input {
     resize: none;
 }
 
+.char-count {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    text-align: right;
+    margin-top: 0.25rem;
+}
+
+/* Username Input */
+.username-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.username-input-wrapper:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
+}
+
+.username-prefix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+    color: var(--color-text-tertiary);
+}
+
+.username-input {
+    flex: 1;
+    padding: 0.75rem 0;
+    background: transparent;
+    border: none;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.username-input:focus {
+    outline: none;
+}
+
+.username-input.error {
+    color: var(--color-error, #ef4444);
+}
+
+.username-input.success {
+    color: var(--color-success, #22c55e);
+}
+
+.username-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+}
+
+.success-icon {
+    color: var(--color-success, #22c55e);
+}
+
+.error-icon {
+    color: var(--color-error, #ef4444);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+    color: var(--color-text-tertiary);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.input-error {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-error, #ef4444);
+    margin-top: 0.35rem;
+}
+
+.input-success {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-success, #22c55e);
+    margin-top: 0.35rem;
+}
+
+.save-error {
+    padding: 0.75rem 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--color-error, #ef4444);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
 .edit-actions {
     display: flex;
     gap: 0.75rem;
     justify-content: center;
+    margin-top: 0.5rem;
 }
 
 .cancel-btn,
 .save-btn {
-    padding: 0.5rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
     border-radius: var(--radius-md);
     font-weight: 500;
     transition: all 0.2s;
@@ -108,11 +248,27 @@
 .cancel-btn {
     background: var(--color-bg-tertiary);
     color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: var(--color-bg-hover);
 }
 
 .save-btn {
     background: var(--color-accent);
     color: var(--color-bg-primary);
+    border: none;
+}
+
+.save-btn:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+}
+
+.save-btn:disabled,
+.cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .profile-stats {

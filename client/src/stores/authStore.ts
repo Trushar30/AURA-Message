@@ -12,7 +12,7 @@ interface AuthStore {
     register: (email: string, password: string, name: string) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
-    updateProfile: (data: { name?: string; bio?: string; avatar?: string }) => Promise<void>;
+    updateProfile: (data: { name?: string; bio?: string; avatar?: string; username?: string }) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
