@@ -89,6 +89,13 @@ class ApiService {
         });
     }
 
+    async updatePreferences(data: { theme?: string; accentColor?: string; fontFamily?: string; fontSize?: string }) {
+        return this.request<{ message: string; preferences: any }>('/auth/preferences', {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
+    }
+
     // Friends
     async sendFriendRequest(userId: string) {
         return this.request<{ message: string; request: any }>(`/friends/request/${userId}`, {
@@ -215,6 +222,50 @@ class ApiService {
         return this.request<{ summary: string }>('/ai/summarize', {
             method: 'POST',
             body: JSON.stringify({ messages }),
+        });
+    }
+
+    // Categories
+    async getCategories() {
+        return this.request<{ categories: any[] }>('/categories');
+    }
+
+    async createCategory(data: { name: string; color?: string; icon?: string }) {
+        return this.request<{ category: any }>('/categories', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateCategory(id: string, data: { name?: string; color?: string; icon?: string }) {
+        return this.request<{ category: any }>(`/categories/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteCategory(id: string) {
+        return this.request<{ message: string }>(`/categories/${id}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async addFriendToCategory(categoryId: string, friendId: string) {
+        return this.request<{ category: any }>(`/categories/${categoryId}/friends/${friendId}`, {
+            method: 'POST',
+        });
+    }
+
+    async removeFriendFromCategory(categoryId: string, friendId: string) {
+        return this.request<{ category: any }>(`/categories/${categoryId}/friends/${friendId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    async reorderCategories(categoryIds: string[]) {
+        return this.request<{ categories: any[] }>('/categories/reorder', {
+            method: 'PATCH',
+            body: JSON.stringify({ categoryIds }),
         });
     }
 }

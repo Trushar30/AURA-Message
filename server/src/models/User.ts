@@ -1,6 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+export interface IUserPreferences {
+    theme: 'dark' | 'light' | 'system';
+    accentColor: string;
+    fontFamily: 'inter' | 'roboto' | 'outfit' | 'poppins' | 'system';
+    fontSize: 'small' | 'medium' | 'large';
+}
+
 export interface IUser extends Document {
     _id: mongoose.Types.ObjectId;
     email: string;
@@ -15,6 +22,7 @@ export interface IUser extends Document {
     isVerified: boolean;
     isProfileComplete: boolean;
     friends: mongoose.Types.ObjectId[];
+    preferences: IUserPreferences;
     createdAt: Date;
     updatedAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
@@ -92,6 +100,27 @@ const userSchema = new Schema<IUser>(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         }],
+        preferences: {
+            theme: {
+                type: String,
+                enum: ['dark', 'light', 'system'],
+                default: 'dark',
+            },
+            accentColor: {
+                type: String,
+                default: '#f59e0b',
+            },
+            fontFamily: {
+                type: String,
+                enum: ['inter', 'roboto', 'outfit', 'poppins', 'system'],
+                default: 'inter',
+            },
+            fontSize: {
+                type: String,
+                enum: ['small', 'medium', 'large'],
+                default: 'medium',
+            },
+        },
     },
     {
         timestamps: true,

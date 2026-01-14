@@ -34,7 +34,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     messages: [],
     typingUsers: [],
     isLoadingConversations: false,
-    isLoadingConversations: false,
+
     isLoadingMessages: false,
     isSummarizing: false,
 

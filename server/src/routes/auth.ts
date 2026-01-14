@@ -13,6 +13,7 @@ import {
     logout,
     completeProfile,
     checkUsername,
+    updatePreferences,
 } from '../controllers/index.js';
 
 const router = Router();
@@ -48,6 +49,15 @@ const completeProfileSchema = z.object({
     }),
 });
 
+const updatePreferencesSchema = z.object({
+    body: z.object({
+        theme: z.enum(['dark', 'light', 'system']).optional(),
+        accentColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+        fontFamily: z.enum(['inter', 'roboto', 'outfit', 'poppins', 'system']).optional(),
+        fontSize: z.enum(['small', 'medium', 'large']).optional(),
+    }),
+});
+
 // Public routes
 router.post('/register', validate(registerSchema), register as any);
 router.post('/login', validate(loginSchema), login as any);
@@ -77,9 +87,11 @@ router.get(
 // Protected routes
 router.get('/me', authenticate as any, getMe as any);
 router.patch('/profile', authenticate as any, validate(updateProfileSchema), updateProfile as any);
+router.patch('/preferences', authenticate as any, validate(updatePreferencesSchema), updatePreferences as any);
 router.post('/complete-profile', authenticate as any, validate(completeProfileSchema), completeProfile as any);
 router.get('/search', authenticate as any, searchUsers as any);
 router.get('/check-username', authenticate as any, checkUsername as any);
 router.post('/logout', authenticate as any, logout as any);
 
 export default router;
+

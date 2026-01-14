@@ -36,6 +36,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
                 name: user.name,
                 avatar: user.avatar,
                 status: user.status,
+                isProfileComplete: user.isProfileComplete,
             },
         });
     } catch (error) {
@@ -77,6 +78,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
                 name: user.name,
                 avatar: user.avatar,
                 status: user.status,
+                isProfileComplete: user.isProfileComplete,
             },
         });
     } catch (error) {
@@ -122,6 +124,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
                 status: user.status,
                 lastSeen: user.lastSeen,
                 isProfileComplete: user.isProfileComplete,
+                preferences: user.preferences,
                 createdAt: user.createdAt,
             },
         });
@@ -309,3 +312,37 @@ export const logout = async (req: AuthRequest, res: Response): Promise<void> => 
     }
 };
 
+export const updatePreferences = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const user = req.user;
+        const { theme, accentColor, fontFamily, fontSize } = req.body;
+
+        if (!user) {
+            res.status(401).json({ error: 'Not authenticated' });
+            return;
+        }
+
+        // Update preferences
+        if (theme && ['dark', 'light', 'system'].includes(theme)) {
+            user.preferences.theme = theme;
+        }
+        if (accentColor && /^#[0-9A-Fa-f]{6}$/.test(accentColor)) {
+            user.preferences.accentColor = accentColor;
+        }
+        if (fontFamily && ['inter', 'roboto', 'outfit', 'poppins', 'system'].includes(fontFamily)) {
+            user.preferences.fontFamily = fontFamily;
+        }
+        if (fontSize && ['small', 'medium', 'large'].includes(fontSize)) {
+            user.preferences.fontSize = fontSize;
+        }
+
+        await user.save();
+
+        res.json({
+            message: 'Preferences updated',
+            preferences: user.preferences,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update preferences' });
+    }
+};

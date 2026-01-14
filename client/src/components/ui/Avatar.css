@@ -67,25 +67,49 @@
 }
 
 /* Status Rings (Minimal & Themed) */
-/* Online - Green Ring */
+/* Online - Green Ring with vibrant avatar */
 .avatar.is-online {
     box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-online);
 }
 
-/* Offline - Subtle Grey Ring (or none for true minimal) */
-.avatar.is-offline {
-    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-bg-elevated);
-    opacity: 0.8;
+.avatar.is-online .avatar-image,
+.avatar.is-online .avatar-initials {
+    filter: saturate(1.1) brightness(1.05);
+    transition: filter 0.3s ease;
 }
 
-/* Away - Amber Ring */
+/* Offline - Grayscale filter for inactive look */
+.avatar.is-offline {
+    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 3px var(--color-text-tertiary);
+}
+
+.avatar.is-offline .avatar-image,
+.avatar.is-offline .avatar-initials {
+    filter: grayscale(100%) brightness(0.85);
+    opacity: 0.7;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Away - Amber Ring with slight desaturation */
 .avatar.is-away {
     box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-away);
+}
+
+.avatar.is-away .avatar-image,
+.avatar.is-away .avatar-initials {
+    filter: saturate(0.6) brightness(0.95);
+    transition: filter 0.3s ease;
 }
 
 /* Busy - Red Ring */
 .avatar.is-busy {
     box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-busy);
+}
+
+.avatar.is-busy .avatar-image,
+.avatar.is-busy .avatar-initials {
+    filter: saturate(0.8);
+    transition: filter 0.3s ease;
 }
 
 /* Hide separate status dot */

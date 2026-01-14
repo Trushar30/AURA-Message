@@ -14,12 +14,25 @@ interface Friend {
     status?: 'online' | 'offline' | 'away' | 'busy';
 }
 
+interface Category {
+    _id: string;
+    name: string;
+    color: string;
+    icon: string;
+    friends: Friend[];
+    order: number;
+}
+
 interface ConversationListProps {
     onNewChat: () => void;
     friends?: Friend[];
     searchQuery?: string;
     onSearchChange?: (query: string) => void;
     onStartConversation?: (userId: string) => void;
+    categories?: Category[];
+    activeCategory?: string | null;
+    onCategoryChange?: (categoryId: string | null) => void;
+    categoryFriendIds?: Set<string> | null;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
@@ -28,6 +41,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     searchQuery = '',
     onSearchChange,
     onStartConversation,
+    categories = [],
+    activeCategory = null,
+    onCategoryChange,
+    categoryFriendIds = null,
 }) => {
     const { user } = useAuthStore();
     const { conversations, activeConversation, setActiveConversation, fetchMessages } = useChatStore();
@@ -90,11 +107,21 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         fetchMessages(conversation._id);
     };
 
-    // Filter conversations by search query
+    // Filter conversations by search query AND category
     const filteredConversations = conversations.filter((conversation) => {
-        if (!searchQuery.trim()) return true;
-        const name = getConversationName(conversation).toLowerCase();
-        return name.includes(searchQuery.toLowerCase());
+        // First filter by search query
+        if (searchQuery.trim()) {
+            const name = getConversationName(conversation).toLowerCase();
+            if (!name.includes(searchQuery.toLowerCase())) return false;
+        }
+
+        // Then filter by category if one is selected
+        if (categoryFriendIds !== null && conversation.type === 'direct') {
+            const otherUserId = getOtherUserId(conversation);
+            if (otherUserId && !categoryFriendIds.has(otherUserId)) return false;
+        }
+
+        return true;
     });
 
     // Get friend IDs that already have conversations
@@ -105,10 +132,15 @@ export const ConversationList: React.FC<ConversationListProps> = ({
             .filter(Boolean)
     );
 
-    // Filter friends who don't have existing conversations and match search
+    // Filter friends who don't have existing conversations and match search + category
     const friendsWithoutConversations = friends.filter((friend) => {
         const hasConversation = friendsWithConversations.has(friend._id);
         if (hasConversation) return false;
+
+        // Filter by category if one is selected
+        if (categoryFriendIds !== null && !categoryFriendIds.has(friend._id)) return false;
+
+        // Filter by search query
         if (!searchQuery.trim()) return true;
         const matchesName = friend.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesUsername = friend.username?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -125,12 +157,40 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         <div className="conversation-list">
             <div className="conversation-list-header">
                 <h2>Messages</h2>
-                <button className="new-chat-btn" onClick={onNewChat}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 5v14M5 12h14" />
-                    </svg>
-                </button>
             </div>
+
+            {/* Category Filter Tabs */}
+            {categories.length > 0 && (
+                <div className="category-filter">
+                    <div className="category-tabs">
+                        <button
+                            className={`category-tab ${activeCategory === null ? 'active' : ''}`}
+                            onClick={() => onCategoryChange?.(null)}
+                        >
+                            All
+                        </button>
+                        {categories.map((category) => (
+                            <button
+                                key={category._id}
+                                className={`category-tab ${activeCategory === category._id ? 'active' : ''}`}
+                                style={{
+                                    '--tab-color': category.color,
+                                    '--tab-bg': activeCategory === category._id
+                                        ? `color-mix(in srgb, ${category.color} 15%, transparent)`
+                                        : undefined
+                                } as React.CSSProperties}
+                                onClick={() => onCategoryChange?.(category._id)}
+                            >
+                                <span
+                                    className="category-dot"
+                                    style={{ backgroundColor: category.color }}
+                                />
+                                {category.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Search Bar */}
             <div className="conversation-search">
@@ -166,8 +226,14 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                             </svg>
                         </div>
-                        <p>{searchQuery ? 'No results found' : 'No conversations yet'}</p>
-                        {!searchQuery && (
+                        <p>
+                            {searchQuery
+                                ? 'No results found'
+                                : activeCategory
+                                    ? 'No conversations in this category'
+                                    : 'No conversations yet'}
+                        </p>
+                        {!searchQuery && !activeCategory && (
                             <button className="start-chat-btn" onClick={onNewChat}>
                                 Start a conversation
                             </button>

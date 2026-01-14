@@ -34,7 +34,7 @@ export const Login: React.FC = () => {
         setIsLoading(true);
         try {
             await login(data.email, data.password);
-            navigate('/');
+            navigate('/app/home');
         } catch (err: any) {
             setError(err.message || 'Login failed');
         } finally {
@@ -47,7 +47,7 @@ export const Login: React.FC = () => {
         setIsLoading(true);
         try {
             await registerUser(data.email, data.password, data.name);
-            navigate('/');
+            navigate('/app/home');
         } catch (err: any) {
             setError(err.message || 'Registration failed');
         } finally {

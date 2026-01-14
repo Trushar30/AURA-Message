@@ -31,7 +31,7 @@ export const AuthCallback: React.FC = () => {
                 if (needsSetup) {
                     navigate('/setup', { replace: true });
                 } else {
-                    navigate('/', { replace: true });
+                    navigate('/app/home', { replace: true });
                 }
             } else {
                 setError('No authentication token received.');

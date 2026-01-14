@@ -14,16 +14,28 @@ interface Friend {
     status?: 'online' | 'offline' | 'away' | 'busy';
 }
 
+interface Category {
+    _id: string;
+    name: string;
+    color: string;
+    icon: string;
+    friends: Friend[];
+    order: number;
+}
+
 export const Home: React.FC = () => {
     const { } = useAuthStore();
     const { fetchConversations, addMessage, addTypingUser, removeTypingUser, updateMessageReadStatus } = useChatStore();
     const [showNewChat, setShowNewChat] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [friends, setFriends] = useState<Friend[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [activeCategory, setActiveCategory] = useState<string | null>(null); // null = "All"
 
     useEffect(() => {
         fetchConversations();
         fetchFriends();
+        fetchCategories();
 
         const unsubMessage = socketService.onMessage((data) => {
             addMessage(data.message);
@@ -69,6 +81,15 @@ export const Home: React.FC = () => {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            const response = await api.getCategories();
+            setCategories(response.categories);
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        }
+    };
+
     const handleStartConversation = async (userId: string) => {
         const { createDirectConversation, setActiveConversation, fetchMessages, fetchConversations: refreshConversations } = useChatStore.getState();
 
@@ -83,6 +104,14 @@ export const Home: React.FC = () => {
         }
     };
 
+    // Get friend IDs for the active category
+    const getCategoryFriendIds = (): Set<string> | null => {
+        if (activeCategory === null) return null; // Show all
+        const category = categories.find(c => c._id === activeCategory);
+        if (!category) return null;
+        return new Set(category.friends.map(f => f._id));
+    };
+
     return (
         <div className="home-page">
             <aside className="conversations-sidebar">
@@ -92,6 +121,10 @@ export const Home: React.FC = () => {
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     onStartConversation={handleStartConversation}
+                    categories={categories}
+                    activeCategory={activeCategory}
+                    onCategoryChange={setActiveCategory}
+                    categoryFriendIds={getCategoryFriendIds()}
                 />
             </aside>
 

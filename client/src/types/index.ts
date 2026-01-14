@@ -1,3 +1,10 @@
+export interface UserPreferences {
+    theme: 'dark' | 'light' | 'system';
+    accentColor: string;
+    fontFamily: 'inter' | 'roboto' | 'outfit' | 'poppins' | 'system';
+    fontSize: 'small' | 'medium' | 'large';
+}
+
 export interface User {
     id: string;
     email: string;
@@ -7,6 +14,7 @@ export interface User {
     status: 'online' | 'offline' | 'away' | 'busy';
     lastSeen?: string;
     isProfileComplete?: boolean;
+    preferences?: UserPreferences;
 }
 
 export interface Message {

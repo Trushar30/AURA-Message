@@ -257,3 +257,64 @@
     border-radius: var(--radius-full);
     flex-shrink: 0;
 }
+
+/* Category Filter Tabs */
+.category-filter {
+    padding: var(--spacing-2) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.category-tabs {
+    display: flex;
+    gap: var(--spacing-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 2px;
+}
+
+.category-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.category-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.category-tab:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-text-tertiary);
+    color: var(--color-text-primary);
+}
+
+.category-tab.active {
+    background: var(--tab-bg, var(--color-accent-subtle));
+    border-color: var(--tab-color, var(--color-accent));
+    color: var(--tab-color, var(--color-accent));
+}
+
+.category-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Active category indicator effect */
+.category-tab.active .category-dot {
+    box-shadow: 0 0 6px currentColor;
+}

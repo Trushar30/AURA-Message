@@ -25,14 +25,15 @@
 .sidebar-brand {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1.5rem;
+    justify-content: center;
+    padding: 1.25rem;
     border-bottom: 1px solid var(--color-border);
 }
 
 .brand-logo {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
 }
 
 .brand-name {
@@ -44,19 +45,21 @@
 /* Navigation */
 .sidebar-nav {
     flex: 1;
-    padding: 1rem 0.75rem;
+    padding: 1rem 0;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
     overflow-y: auto;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-md);
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
     color: var(--color-text-secondary);
     text-decoration: none;
     transition: all 0.2s ease;
@@ -73,8 +76,8 @@
 }
 
 .nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
 }
 
@@ -99,8 +102,8 @@
     padding: 1rem;
     border-top: 1px solid var(--color-border);
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
     gap: 0.75rem;
 }
 

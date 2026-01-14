@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login, AuthCallback, ProfileSetup, Landing, Home, Search, Request, Teams, Settings, Profile } from './pages';
 import { AppShell } from './components/layout';
 import { useAuthStore } from './stores';
+import { useThemeStore } from './stores/themeStore';
 import './styles/index.css';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -79,11 +80,19 @@ const SetupRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const App: React.FC = () => {
-    const { checkAuth } = useAuthStore();
+    const { checkAuth, user, isLoading } = useAuthStore();
+    const { initializeFromUser, isInitialized } = useThemeStore();
 
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
+
+    // Initialize theme after auth completes
+    useEffect(() => {
+        if (!isLoading && !isInitialized) {
+            initializeFromUser(user?.preferences);
+        }
+    }, [isLoading, isInitialized, user?.preferences, initializeFromUser]);
 
     return (
         <BrowserRouter>
