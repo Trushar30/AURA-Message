@@ -3,4 +3,6 @@ import conversationRoutes from './conversations.js';
 import messageRoutes from './messages.js';
 import friendRoutes from './friends.js';
 
-export { authRoutes, conversationRoutes, messageRoutes, friendRoutes };
+import aiRoutes from './ai.js';
+
+export { authRoutes, conversationRoutes, messageRoutes, friendRoutes, aiRoutes };

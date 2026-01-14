@@ -209,6 +209,14 @@ class ApiService {
         if (conversationId) params.set('conversationId', conversationId);
         return this.request<{ messages: any[] }>(`/messages/search?${params}`);
     }
+
+    // AI
+    async summarizeMessages(messages: string[]) {
+        return this.request<{ summary: string }>('/ai/summarize', {
+            method: 'POST',
+            body: JSON.stringify({ messages }),
+        });
+    }
 }
 
 export const api = new ApiService();

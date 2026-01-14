@@ -8,9 +8,12 @@ import './MessageThread.css';
 
 export const MessageThread: React.FC = () => {
     const { user } = useAuthStore();
-    const { activeConversation, messages, isLoadingMessages } = useChatStore();
+    const { activeConversation, messages, isLoadingMessages, summarizeMessages, isSummarizing } = useChatStore();
     const [newMessage, setNewMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
+    const [summaryResult, setSummaryResult] = useState<string | null>(null);
     const [activeInfoId, setActiveInfoId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -79,6 +82,26 @@ export const MessageThread: React.FC = () => {
         }
     };
 
+    const toggleSelectionMode = () => {
+        setIsSelectionMode(!isSelectionMode);
+        setSelectedMessageIds([]);
+        setSummaryResult(null);
+    };
+
+    const toggleMessageSelection = (messageId: string) => {
+        setSelectedMessageIds(prev =>
+            prev.includes(messageId)
+                ? prev.filter(id => id !== messageId)
+                : [...prev, messageId]
+        );
+    };
+
+    const handleSummarize = async () => {
+        if (selectedMessageIds.length === 0) return;
+        const summary = await summarizeMessages(selectedMessageIds);
+        setSummaryResult(summary);
+    };
+
     const renderMessage = (message: Message, index: number) => {
         const currentUserId = user?.id || (user as any)?._id;
         const senderId = message.sender.id || (message.sender as any)?._id;
@@ -98,6 +121,16 @@ export const MessageThread: React.FC = () => {
                 className={`message ${isMine ? 'message-sent' : 'message-received'} ${showAvatar ? 'has-avatar' : ''
                     }`}
             >
+                {isSelectionMode && (
+                    <div className="message-checkbox-container">
+                        <input
+                            type="checkbox"
+                            className="message-checkbox"
+                            checked={selectedMessageIds.includes(message._id)}
+                            onChange={() => toggleMessageSelection(message._id)}
+                        />
+                    </div>
+                )}
                 {!isMine && showAvatar && (
                     <Avatar name={message.sender.name} src={message.sender.avatar} size="sm" />
                 )}
@@ -280,6 +313,24 @@ export const MessageThread: React.FC = () => {
                         )}
                     </span>
                 </div>
+                <div className="thread-actions">
+                    <button className="icon-btn" onClick={toggleSelectionMode} title="Select Messages">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                    {isSelectionMode && (
+                        <button className="icon-btn" onClick={handleSummarize} disabled={selectedMessageIds.length === 0 || isSummarizing} title="Summarize">
+                            {isSummarizing ? (
+                                <div className="spinner-sm" />
+                            ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            )}
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="messages-container">
@@ -308,21 +359,51 @@ export const MessageThread: React.FC = () => {
                 )}
             </div>
 
-            <form className="message-composer" onSubmit={handleSubmit}>
-                <textarea
-                    ref={inputRef}
-                    value={newMessage}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type a message..."
-                    rows={1}
-                />
-                <button type="submit" disabled={!newMessage.trim()}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                    </svg>
-                </button>
-            </form>
+            {isSelectionMode ? (
+                <div className="selection-bar">
+                    <span className="selection-count">{selectedMessageIds.length} selected</span>
+                    <div className="selection-actions">
+                        <button className="btn-secondary" onClick={() => setIsSelectionMode(false)}>Cancel</button>
+                        <button className="btn-primary" onClick={handleSummarize} disabled={selectedMessageIds.length === 0 || isSummarizing}>
+                            {isSummarizing ? 'Summarizing...' : 'Generate Summary'}
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <form className="message-composer" onSubmit={handleSubmit}>
+                    <textarea
+                        ref={inputRef}
+                        value={newMessage}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Type a message..."
+                        rows={1}
+                    />
+                    <button type="submit" disabled={!newMessage.trim()}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                        </svg>
+                    </button>
+                </form>
+            )}
+
+            {summaryResult && (
+                <div className="summary-modal-overlay">
+                    <div className="summary-modal">
+                        <div className="summary-header">
+                            <h3>Conversation Summary</h3>
+                            <button className="close-btn" onClick={() => setSummaryResult(null)}>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M18 6L6 18M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="summary-content">
+                            {summaryResult}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

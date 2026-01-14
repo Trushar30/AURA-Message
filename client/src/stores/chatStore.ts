@@ -11,6 +11,7 @@ interface ChatStore {
     typingUsers: TypingUser[];
     isLoadingConversations: boolean;
     isLoadingMessages: boolean;
+    isSummarizing: boolean;
 
     // Actions
     fetchConversations: () => Promise<void>;
@@ -24,6 +25,7 @@ interface ChatStore {
     updateMessageReadStatus: (messageIds: string[], userId: string, readAt: string) => void;
     createDirectConversation: (recipientId: string) => Promise<Conversation>;
     createGroupConversation: (name: string, participantIds: string[], description?: string) => Promise<Conversation>;
+    summarizeMessages: (messageIds: string[]) => Promise<string>;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -32,7 +34,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     messages: [],
     typingUsers: [],
     isLoadingConversations: false,
+    isLoadingConversations: false,
     isLoadingMessages: false,
+    isSummarizing: false,
 
     fetchConversations: async () => {
         set({ isLoadingConversations: true });
@@ -194,5 +198,20 @@ export const useChatStore = create<ChatStore>((set, get) => ({
                 return msg;
             }),
         }));
+    },
+
+    summarizeMessages: async (messageIds) => {
+        set({ isSummarizing: true });
+        try {
+            // Get content of selected messages
+            const messages = get().messages
+                .filter(m => messageIds.includes(m._id))
+                .map(m => `${m.sender.name}: ${m.content}`);
+
+            const response = await api.summarizeMessages(messages);
+            return response.summary;
+        } finally {
+            set({ isSummarizing: false });
+        }
     },
 }));
