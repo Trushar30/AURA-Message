@@ -66,83 +66,29 @@
     font-size: 20px;
 }
 
+/* Status Rings (Minimal & Themed) */
+/* Online - Green Ring */
+.avatar.is-online {
+    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-online);
+}
+
+/* Offline - Subtle Grey Ring (or none for true minimal) */
+.avatar.is-offline {
+    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-bg-elevated);
+    opacity: 0.8;
+}
+
+/* Away - Amber Ring */
+.avatar.is-away {
+    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-away);
+}
+
+/* Busy - Red Ring */
+.avatar.is-busy {
+    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-busy);
+}
+
+/* Hide separate status dot */
 .avatar-status {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 14px;
-    height: 14px;
-    border-radius: var(--radius-full);
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 10;
-    transition: all 0.3s ease;
-}
-
-.avatar-xs .avatar-status,
-.avatar-sm .avatar-status {
-    width: 10px;
-    height: 10px;
-}
-
-/* Online - Pulsing Green Orb */
-.avatar-status-online {
-    background: var(--color-online);
-    box-shadow: 0 0 4px var(--color-online);
-}
-
-.avatar-status-online::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 50%;
-    border: 1px solid var(--color-online);
-    opacity: 0;
-    animation: ripple 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes ripple {
-    0% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-/* Offline - Hollow Gray Ring */
-.avatar-status-offline {
-    background: var(--color-bg-secondary);
-    border: 2px solid var(--color-text-tertiary);
-    box-shadow: none;
-}
-
-/* Away - Amber Clock/Dot */
-.avatar-status-away {
-    background: var(--color-away);
-    box-shadow: 0 0 4px var(--color-away);
-}
-
-/* Busy - Red Do Not Disturb */
-.avatar-status-busy {
-    background: var(--color-busy);
-    box-shadow: 0 0 4px var(--color-busy);
-}
-
-.avatar-status-busy::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 2px;
-    right: 2px;
-    height: 2px;
-    background: white;
-    transform: translateY(-50%);
-    border-radius: 1px;
+    display: none;
 }

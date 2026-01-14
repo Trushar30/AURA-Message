@@ -31,8 +31,10 @@ export const Avatar: React.FC<AvatarProps> = ({
     const colorIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
     const bgColor = colors[colorIndex];
 
+    const statusClass = showStatus && status ? `is-${status}` : '';
+
     return (
-        <div className={`avatar avatar-${size}`}>
+        <div className={`avatar avatar-${size} ${statusClass}`}>
             {src ? (
                 <img src={src} alt={name} className="avatar-image" />
             ) : (

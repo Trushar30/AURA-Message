@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores';
 import { Avatar } from '../ui';
@@ -62,7 +62,6 @@ const LogoutIcon = () => (
 export const AppShell: React.FC = () => {
     const { user, logout } = useAuthStore();
     const navigate = useNavigate();
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     const handleLogout = async () => {
         await logout();
@@ -79,11 +78,10 @@ export const AppShell: React.FC = () => {
     ];
 
     return (
-        <div className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        <div className="app-shell sidebar-collapsed">
             <aside className="app-sidebar">
                 <div className="sidebar-brand">
                     <img src="/logo.svg" alt="AURA" className="brand-logo" />
-                    {!sidebarCollapsed && <span className="brand-name">Aura</span>}
                 </div>
 
                 <nav className="sidebar-nav">
@@ -92,9 +90,9 @@ export const AppShell: React.FC = () => {
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                            title={item.label}
                         >
                             <span className="nav-icon">{item.icon}</span>
-                            {!sidebarCollapsed && <span className="nav-label">{item.label}</span>}
                         </NavLink>
                     ))}
                 </nav>
@@ -108,27 +106,11 @@ export const AppShell: React.FC = () => {
                             status="online"
                             showStatus
                         />
-                        {!sidebarCollapsed && (
-                            <div className="user-info">
-                                <span className="user-name">{user?.name}</span>
-                                <span className="user-email">{user?.email}</span>
-                            </div>
-                        )}
                     </div>
                     <button className="logout-btn" onClick={handleLogout} title="Logout">
                         <LogoutIcon />
                     </button>
                 </div>
-
-                <button
-                    className="collapse-btn"
-                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                    title={sidebarCollapsed ? 'Expand' : 'Collapse'}
-                >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points={sidebarCollapsed ? "9 18 15 12 9 6" : "15 18 9 12 15 6"} />
-                    </svg>
-                </button>
             </aside>
 
             <main className="app-main">
