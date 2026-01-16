@@ -299,7 +299,7 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
                     {/* Status Pill */}
                     <div className={`qp-status-pill ${statusInfo.class}`}>
                         {displayStatus === 'online' && <span className="status-pulse" />}
-                        <span className="status-emoji">{statusInfo.emoji}</span>
+                        {/* <span className="status-emoji">{statusInfo.emoji}</span> */}
                         <span className="status-text">{statusInfo.text}</span>
                         <span className="status-separator">•</span>
                         <span className="last-seen">{getLastSeenText()}</span>
