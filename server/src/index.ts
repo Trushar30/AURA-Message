@@ -16,7 +16,7 @@ const io = initializeSocket(httpServer);
 
 // Middleware
 app.use(cors({
-    origin: config.clientUrl,
+    origin: [config.clientUrl, 'http://10.166.206.112:5173'],
     credentials: true,
 }));
 app.use(express.json());

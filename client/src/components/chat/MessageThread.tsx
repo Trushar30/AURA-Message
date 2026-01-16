@@ -4,6 +4,7 @@ import { Avatar, QuickProfile } from '../ui';
 import { Message, User } from '../../types';
 import { useAuthStore, useChatStore } from '../../stores';
 import { socketService } from '../../services/socket';
+import ReactMarkdown from 'react-markdown';
 import './MessageThread.css';
 
 export const MessageThread: React.FC = () => {
@@ -17,6 +18,7 @@ export const MessageThread: React.FC = () => {
     const [activeInfoId, setActiveInfoId] = useState<string | null>(null);
     const [profileUser, setProfileUser] = useState<User | null>(null);
     const [profilePosition, setProfilePosition] = useState({ x: 0, y: 0 });
+    const [isCopied, setIsCopied] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
@@ -109,6 +111,17 @@ export const MessageThread: React.FC = () => {
         const rect = (event.target as HTMLElement).getBoundingClientRect();
         setProfilePosition({ x: rect.left, y: rect.bottom + 8 });
         setProfileUser(clickedUser);
+    };
+
+    const handleCopySummary = async () => {
+        if (!summaryResult) return;
+        try {
+            await navigator.clipboard.writeText(summaryResult);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy summary', err);
+        }
     };
 
     const renderMessage = (message: Message, index: number) => {
@@ -413,16 +426,55 @@ export const MessageThread: React.FC = () => {
             {summaryResult && (
                 <div className="summary-modal-overlay">
                     <div className="summary-modal">
-                        <div className="summary-header">
-                            <h3>Conversation Summary</h3>
-                            <button className="close-btn" onClick={() => setSummaryResult(null)}>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M18 6L6 18M6 6l12 12" />
-                                </svg>
-                            </button>
+                        {/* Decorative Background */}
+                        <div className="summary-decoration">
+                            <div className="summary-orb orb-1" />
+                            <div className="summary-orb orb-2" />
                         </div>
-                        <div className="summary-content">
-                            {summaryResult}
+
+                        <div className="summary-header">
+                            <div className="summary-title-group">
+                                <div className="summary-icon-box">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                                    </svg>
+                                </div>
+                                <div className="summary-title-text">
+                                    <h3>Conversation Summary</h3>
+                                    <span className="summary-subtitle">AI-generated • {selectedMessageIds.length} messages selected</span>
+                                </div>
+                            </div>
+                            <div className="summary-actions-group">
+                                <button
+                                    className={`icon-action-btn ${isCopied ? 'success' : ''}`}
+                                    onClick={handleCopySummary}
+                                    title="Copy to clipboard"
+                                >
+                                    {isCopied ? (
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    ) : (
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                        </svg>
+                                    )}
+                                </button>
+                                <button className="icon-action-btn close" onClick={() => setSummaryResult(null)}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 6L6 18M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div className="summary-content-scroll">
+                            <div className="summary-content markdown-body">
+                                <ReactMarkdown>{summaryResult}</ReactMarkdown>
+                            </div>
+                        </div>
+                        <div className="summary-footer">
+                            <p>Content generated by AI may contain inaccuracies.</p>
                         </div>
                     </div>
                 </div>

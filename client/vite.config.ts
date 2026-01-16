@@ -14,11 +14,11 @@ export default defineConfig({
         host: '0.0.0.0', // Allow connections from any network interface
         proxy: {
             '/api': {
-                target: 'http://localhost:5000', // Proxy runs locally
+                target: 'http://10.166.206.112:5000', // Backend server IP
                 changeOrigin: true,
             },
             '/socket.io': {
-                target: 'http://localhost:5000', // Proxy runs locally
+                target: 'http://10.166.206.112:5000', // Backend server IP
                 changeOrigin: true,
                 ws: true,
             },
