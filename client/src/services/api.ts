@@ -96,6 +96,22 @@ class ApiService {
         });
     }
 
+    async getUserProfile(userId: string) {
+        return this.request<{
+            user: {
+                id: string;
+                name: string;
+                username?: string;
+                avatar?: string;
+                bio?: string;
+                status: string;
+                lastSeen: string;
+                createdAt: string;
+                mutualFriendsCount: number;
+            }
+        }>(`/auth/profile/${userId}`);
+    }
+
     // Friends
     async sendFriendRequest(userId: string) {
         return this.request<{ message: string; request: any }>(`/friends/request/${userId}`, {

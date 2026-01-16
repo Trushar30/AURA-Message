@@ -14,6 +14,7 @@ import {
     completeProfile,
     checkUsername,
     updatePreferences,
+    getUserProfile,
 } from '../controllers/index.js';
 
 const router = Router();
@@ -92,6 +93,7 @@ router.patch('/preferences', authenticate as any, validate(updatePreferencesSche
 router.post('/complete-profile', authenticate as any, validate(completeProfileSchema), completeProfile as any);
 router.get('/search', authenticate as any, searchUsers as any);
 router.get('/check-username', authenticate as any, checkUsername as any);
+router.get('/profile/:userId', authenticate as any, getUserProfile as any);
 router.post('/logout', authenticate as any, logout as any);
 
 export default router;

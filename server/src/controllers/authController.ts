@@ -346,3 +346,50 @@ export const updatePreferences = async (req: AuthRequest, res: Response): Promis
         res.status(500).json({ error: 'Failed to update preferences' });
     }
 };
+
+// Get another user's profile
+export const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { userId } = req.params;
+        const currentUser = req.user;
+
+        if (!currentUser) {
+            res.status(401).json({ error: 'Not authenticated' });
+            return;
+        }
+
+        const targetUser = await User.findById(userId).select('name username avatar bio status lastSeen createdAt friends');
+
+        if (!targetUser) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+        }
+
+        // Calculate mutual friends
+        const currentUserFriends = currentUser.friends || [];
+        const targetUserFriends = targetUser.friends || [];
+        const mutualFriendsCount = currentUserFriends.filter(
+            (friendId) => targetUserFriends.some(
+                (targetFriendId) => targetFriendId.toString() === friendId.toString()
+            )
+        ).length;
+
+        res.json({
+            user: {
+                id: targetUser._id,
+                name: targetUser.name,
+                username: targetUser.username,
+                avatar: targetUser.avatar,
+                bio: targetUser.bio,
+                status: targetUser.status,
+                lastSeen: targetUser.lastSeen,
+                createdAt: targetUser.createdAt,
+                mutualFriendsCount,
+            },
+        });
+    } catch (error) {
+        console.error('Get user profile error:', error);
+        res.status(500).json({ error: 'Failed to get user profile' });
+    }
+};
+

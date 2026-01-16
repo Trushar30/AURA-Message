@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Avatar } from './Avatar';
 import { User } from '../../types';
 import { api } from '../../services/api';
-import { useAuthStore } from '../../stores';
+import { useAuthStore, useChatStore } from '../../stores';
 import './QuickProfile.css';
 
 interface QuickProfileProps {
@@ -14,9 +14,20 @@ interface QuickProfileProps {
 }
 
 interface FriendshipStatus {
-    status: 'none' | 'pending' | 'friends' | 'self';
-    isSender?: boolean;
+    status: 'none' | 'pending_sent' | 'pending_received' | 'friends';
     requestId?: string;
+}
+
+interface ProfileData {
+    id: string;
+    name: string;
+    username?: string;
+    avatar?: string;
+    bio?: string;
+    status: string;
+    lastSeen: string;
+    createdAt: string;
+    mutualFriendsCount: number;
 }
 
 export const QuickProfile: React.FC<QuickProfileProps> = ({
@@ -27,7 +38,9 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
     anchorRef,
 }) => {
     const { user: currentUser } = useAuthStore();
+    const { setActiveConversation, conversations, fetchConversations } = useChatStore();
     const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>({ status: 'none' });
+    const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
@@ -73,23 +86,30 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
         }
     }, [isOpen]);
 
-    // Fetch friendship status
+    // Fetch profile data and friendship status
     useEffect(() => {
-        const fetchStatus = async () => {
-            if (!isOpen || isSelf) return;
+        const fetchData = async () => {
+            if (!isOpen || !userId) return;
 
             setIsLoading(true);
             try {
-                const response = await api.getFriendshipStatus(userId);
-                setFriendshipStatus(response as FriendshipStatus);
+                // Fetch profile data
+                const profileResponse = await api.getUserProfile(userId);
+                setProfileData(profileResponse.user);
+
+                // Fetch friendship status if not self
+                if (!isSelf) {
+                    const statusResponse = await api.getFriendshipStatus(userId);
+                    setFriendshipStatus(statusResponse as FriendshipStatus);
+                }
             } catch (error) {
-                console.error('Failed to fetch friendship status:', error);
+                console.error('Failed to fetch profile data:', error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchStatus();
+        fetchData();
     }, [isOpen, userId, isSelf]);
 
     // Close on outside click
@@ -121,8 +141,8 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
     const handleSendRequest = async () => {
         setActionLoading(true);
         try {
-            await api.sendFriendRequest(userId);
-            setFriendshipStatus({ status: 'pending', isSender: true });
+            const response = await api.sendFriendRequest(userId);
+            setFriendshipStatus({ status: 'pending_sent', requestId: response.request?._id });
         } catch (error) {
             console.error('Failed to send friend request:', error);
         } finally {
@@ -158,10 +178,21 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
 
     const handleMessage = async () => {
         try {
-            await api.createDirectConversation(userId);
+            // Check if conversation already exists
+            const existingConversation = conversations.find(
+                (c) => c.type === 'direct' && c.participants.some(
+                    (p) => (p.user.id || (p.user as any)?._id) === userId
+                )
+            );
+
+            if (existingConversation) {
+                setActiveConversation(existingConversation);
+            } else {
+                const response = await api.createDirectConversation(userId);
+                await fetchConversations();
+                setActiveConversation(response.conversation);
+            }
             onClose();
-            // Trigger a refresh of conversations
-            window.location.reload();
         } catch (error) {
             console.error('Failed to start conversation:', error);
         }
@@ -170,13 +201,15 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
     // Generate a unique "vibe" based on username/name
     const getVibeEmoji = () => {
         const vibes = ['🌟', '✨', '🔥', '💫', '🌈', '🦋', '🌸', '🎭', '🎨', '🎵', '⚡', '🌙', '☀️', '🌊', '🍀'];
-        const hash = (user.name || user.username || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const name = profileData?.name || user.name || user.username || '';
+        const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         return vibes[hash % vibes.length];
     };
 
     // Get status text with emoji
     const getStatusInfo = () => {
-        switch (user.status) {
+        const status = profileData?.status || user.status;
+        switch (status) {
             case 'online':
                 return { text: 'Online', emoji: '🟢', class: 'status-online' };
             case 'away':
@@ -190,12 +223,15 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
 
     // Get time since last seen
     const getLastSeenText = () => {
-        if (user.status === 'online') return 'Active now';
-        if (!user.lastSeen) return 'Last seen recently';
+        const status = profileData?.status || user.status;
+        if (status === 'online') return 'Active now';
 
-        const lastSeen = new Date(user.lastSeen);
+        const lastSeen = profileData?.lastSeen || user.lastSeen;
+        if (!lastSeen) return 'Last seen recently';
+
+        const lastSeenDate = new Date(lastSeen);
         const now = new Date();
-        const diffMs = now.getTime() - lastSeen.getTime();
+        const diffMs = now.getTime() - lastSeenDate.getTime();
         const diffMins = Math.floor(diffMs / 60000);
         const diffHours = Math.floor(diffMins / 60);
         const diffDays = Math.floor(diffHours / 24);
@@ -204,12 +240,27 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
         if (diffMins < 60) return `${diffMins}m ago`;
         if (diffHours < 24) return `${diffHours}h ago`;
         if (diffDays < 7) return `${diffDays}d ago`;
-        return lastSeen.toLocaleDateString();
+        return lastSeenDate.toLocaleDateString();
+    };
+
+    // Get member since text
+    const getMemberSince = () => {
+        const createdAt = profileData?.createdAt;
+        if (!createdAt) return 'Recently';
+
+        const date = new Date(createdAt);
+        const options: Intl.DateTimeFormatOptions = { month: 'short', year: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
     };
 
     if (!isOpen) return null;
 
     const statusInfo = getStatusInfo();
+    const displayName = profileData?.name || user.name;
+    const displayUsername = profileData?.username || user.username;
+    const displayBio = profileData?.bio || user.bio;
+    const displayAvatar = profileData?.avatar || user.avatar;
+    const displayStatus = (profileData?.status || user.status) as 'online' | 'offline' | 'away' | 'busy';
 
     return (
         <div className="quick-profile-overlay">
@@ -228,10 +279,10 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
                     </button>
                     <div className="qp-avatar-container">
                         <Avatar
-                            name={user.name}
-                            src={user.avatar}
+                            name={displayName}
+                            src={displayAvatar}
                             size="xl"
-                            status={user.status}
+                            status={displayStatus}
                             showStatus={true}
                         />
                         <span className="qp-vibe-badge">{getVibeEmoji()}</span>
@@ -240,14 +291,14 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
 
                 {/* User Info */}
                 <div className="qp-info">
-                    <h3 className="qp-name">{user.name}</h3>
-                    {user.username && (
-                        <span className="qp-username">@{user.username}</span>
+                    <h3 className="qp-name">{displayName}</h3>
+                    {displayUsername && (
+                        <span className="qp-username">@{displayUsername}</span>
                     )}
 
                     {/* Status Pill */}
                     <div className={`qp-status-pill ${statusInfo.class}`}>
-                        {user.status === 'online' && <span className="status-pulse" />}
+                        {displayStatus === 'online' && <span className="status-pulse" />}
                         <span className="status-emoji">{statusInfo.emoji}</span>
                         <span className="status-text">{statusInfo.text}</span>
                         <span className="status-separator">•</span>
@@ -255,13 +306,26 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
                     </div>
 
                     {/* Bio */}
-                    {user.bio && (
-                        <p className="qp-bio">{user.bio}</p>
+                    {displayBio && (
+                        <p className="qp-bio">{displayBio}</p>
                     )}
                 </div>
 
                 {/* Quick Stats */}
                 <div className="qp-stats">
+                    <div className="qp-stat">
+                        <div className="qp-stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                        </div>
+                        <span className="qp-stat-label">Member since</span>
+                        <span className="qp-stat-value">{getMemberSince()}</span>
+                    </div>
+                    <div className="qp-stat-divider" />
                     <div className="qp-stat">
                         <div className="qp-stat-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -271,18 +335,8 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                             </svg>
                         </div>
-                        <span className="qp-stat-label">Member since</span>
-                        <span className="qp-stat-value">2024</span>
-                    </div>
-                    <div className="qp-stat-divider" />
-                    <div className="qp-stat">
-                        <div className="qp-stat-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                            </svg>
-                        </div>
-                        <span className="qp-stat-label">Conversations</span>
-                        <span className="qp-stat-value">Active</span>
+                        <span className="qp-stat-label">Mutual friends</span>
+                        <span className="qp-stat-value">{profileData?.mutualFriendsCount ?? 0}</span>
                     </div>
                 </div>
 
@@ -307,11 +361,11 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
                                             <line x1="20" y1="8" x2="20" y2="14" />
                                             <line x1="23" y1="11" x2="17" y2="11" />
                                         </svg>
-                                        Add Friend
+                                        {actionLoading ? 'Sending...' : 'Add Friend'}
                                     </button>
                                 )}
 
-                                {friendshipStatus.status === 'pending' && friendshipStatus.isSender && (
+                                {friendshipStatus.status === 'pending_sent' && (
                                     <button
                                         className="qp-btn qp-btn-secondary"
                                         onClick={handleCancelRequest}
@@ -322,11 +376,11 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
                                             <line x1="15" y1="9" x2="9" y2="15" />
                                             <line x1="9" y1="9" x2="15" y2="15" />
                                         </svg>
-                                        Cancel Request
+                                        {actionLoading ? 'Cancelling...' : 'Cancel Request'}
                                     </button>
                                 )}
 
-                                {friendshipStatus.status === 'pending' && !friendshipStatus.isSender && (
+                                {friendshipStatus.status === 'pending_received' && (
                                     <button
                                         className="qp-btn qp-btn-primary"
                                         onClick={handleAcceptRequest}
@@ -336,7 +390,7 @@ export const QuickProfile: React.FC<QuickProfileProps> = ({
                                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                             <polyline points="22 4 12 14.01 9 11.01" />
                                         </svg>
-                                        Accept Request
+                                        {actionLoading ? 'Accepting...' : 'Accept Request'}
                                     </button>
                                 )}
 
