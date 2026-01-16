@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { format } from 'date-fns';
-import { Avatar } from '../ui';
-import { Message } from '../../types';
+import { Avatar, QuickProfile } from '../ui';
+import { Message, User } from '../../types';
 import { useAuthStore, useChatStore } from '../../stores';
 import { socketService } from '../../services/socket';
 import './MessageThread.css';
@@ -15,6 +15,8 @@ export const MessageThread: React.FC = () => {
     const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
     const [summaryResult, setSummaryResult] = useState<string | null>(null);
     const [activeInfoId, setActiveInfoId] = useState<string | null>(null);
+    const [profileUser, setProfileUser] = useState<User | null>(null);
+    const [profilePosition, setProfilePosition] = useState({ x: 0, y: 0 });
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
@@ -102,6 +104,13 @@ export const MessageThread: React.FC = () => {
         setSummaryResult(summary);
     };
 
+    const handleAvatarClick = (clickedUser: User, event: React.MouseEvent) => {
+        event.stopPropagation();
+        const rect = (event.target as HTMLElement).getBoundingClientRect();
+        setProfilePosition({ x: rect.left, y: rect.bottom + 8 });
+        setProfileUser(clickedUser);
+    };
+
     const renderMessage = (message: Message, index: number) => {
         const currentUserId = user?.id || (user as any)?._id;
         const senderId = message.sender.id || (message.sender as any)?._id;
@@ -132,7 +141,15 @@ export const MessageThread: React.FC = () => {
                     </div>
                 )}
                 {!isMine && showAvatar && (
-                    <Avatar name={message.sender.name} src={message.sender.avatar} size="sm" />
+                    <div
+                        className="message-avatar-clickable"
+                        onClick={(e) => handleAvatarClick(message.sender, e)}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`View ${message.sender.name}'s profile`}
+                    >
+                        <Avatar name={message.sender.name} src={message.sender.avatar} size="sm" />
+                    </div>
                 )}
                 <div className="message-content">
                     {!isMine && showAvatar && activeConversation?.type === 'group' && (
@@ -282,37 +299,43 @@ export const MessageThread: React.FC = () => {
     return (
         <div className="message-thread">
             <div className="thread-header">
-                <Avatar
-                    name={
-                        activeConversation.type === 'group'
-                            ? activeConversation.name || 'Group'
-                            : otherUser?.name || 'Unknown'
-                    }
-                    src={
-                        activeConversation.type === 'group'
-                            ? activeConversation.avatar
-                            : otherUser?.avatar
-                    }
-                    size="md"
-                    status={otherUser?.status}
-                    showStatus={activeConversation.type === 'direct'}
-                />
-                <div className="thread-info">
-                    <h3>
-                        {activeConversation.type === 'group'
-                            ? activeConversation.name
-                            : otherUser?.name || 'Unknown'}
-                    </h3>
-                    <span className="thread-status">
-                        {activeConversation.type === 'group' ? (
-                            `${activeConversation.participants.length} members`
-                        ) : otherUser?.status === 'online' ? (
-                            'Online'
-                        ) : (
-                            'Offline'
-                        )}
-                    </span>
-                </div>
+                {activeConversation.type === 'direct' && otherUser ? (
+                    <div
+                        className="thread-header-user"
+                        onClick={(e) => handleAvatarClick(otherUser, e)}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`View ${otherUser.name}'s profile`}
+                    >
+                        <Avatar
+                            name={otherUser.name || 'Unknown'}
+                            src={otherUser.avatar}
+                            size="md"
+                            status={otherUser.status}
+                            showStatus={true}
+                        />
+                        <div className="thread-info">
+                            <h3>{otherUser.name || 'Unknown'}</h3>
+                            <span className="thread-status">
+                                {otherUser.status === 'online' ? 'Online' : 'Offline'}
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <Avatar
+                            name={activeConversation.name || 'Group'}
+                            src={activeConversation.avatar}
+                            size="md"
+                        />
+                        <div className="thread-info">
+                            <h3>{activeConversation.name}</h3>
+                            <span className="thread-status">
+                                {`${activeConversation.participants.length} members`}
+                            </span>
+                        </div>
+                    </>
+                )}
                 <div className="thread-actions">
                     <button className="icon-btn" onClick={toggleSelectionMode} title="Select Messages">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -403,6 +426,16 @@ export const MessageThread: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Quick Profile Popup */}
+            {profileUser && (
+                <QuickProfile
+                    user={profileUser}
+                    isOpen={!!profileUser}
+                    onClose={() => setProfileUser(null)}
+                    position={profilePosition}
+                />
             )}
         </div>
     );

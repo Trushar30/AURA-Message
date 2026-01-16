@@ -87,6 +87,29 @@
     color: var(--color-text-tertiary);
 }
 
+.thread-header-user {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    cursor: pointer;
+    padding: var(--spacing-2);
+    margin: calc(-1 * var(--spacing-2));
+    border-radius: var(--radius-lg);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.thread-header-user:hover {
+    background-color: var(--color-bg-hover);
+}
+
+.thread-header-user:hover .avatar {
+    box-shadow: 0 0 0 2px var(--color-accent), 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.thread-header-user:active {
+    transform: scale(0.98);
+}
+
 .typing-text {
     color: var(--color-accent);
     animation: pulse 1.5s ease-in-out infinite;
@@ -921,4 +944,31 @@
     border-top-color: white;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
+}
+
+/* Clickable Avatar for Quick Profile */
+.message-avatar-clickable {
+    cursor: pointer;
+    transition: transform var(--transition-fast), filter var(--transition-fast);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message-avatar-clickable:hover {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.message-avatar-clickable:hover .avatar {
+    box-shadow: 0 0 0 2px var(--color-accent), 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.message-avatar-clickable:focus-visible {
+    outline: none;
+}
+
+.message-avatar-clickable:focus-visible .avatar {
+    box-shadow: 0 0 0 2px var(--color-accent), 0 0 0 4px rgba(245, 158, 11, 0.3);
 }
